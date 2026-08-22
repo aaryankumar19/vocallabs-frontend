@@ -100,8 +100,12 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
   };
 
   const totalCount = commitments.length;
-  const completedCount = commitments.filter((c) => (c.status || "").toLowerCase().includes("complete")).length;
-  const inProgressCount = commitments.filter((c) => (c.status || "").toLowerCase().includes("progress")).length;
+  const completedCount = commitments.filter((c) =>
+    (c.status || "").toLowerCase().includes("complete"),
+  ).length;
+  const inProgressCount = commitments.filter((c) =>
+    (c.status || "").toLowerCase().includes("progress"),
+  ).length;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-4 sm:p-6 bg-[#0F292B]/40 backdrop-blur-md animate-in fade-in duration-200">
@@ -128,7 +132,9 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
                   {meeting.status}
                 </span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-[#0F292B] tracking-tight">{meeting.title}</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#0F292B] tracking-tight">
+                {meeting.title}
+              </h2>
               <p className="text-xs text-[#115E59] mt-1">
                 Meeting Commitments &amp; AI LangGraph Autonomous Verification
               </p>
@@ -169,7 +175,9 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
               ) : (
                 <Sparkles className="w-3.5 h-3.5 text-white" />
               )}
-              <span>{isAnalyzing ? "Extracting Commitments..." : "Extract Commitments with AI"}</span>
+              <span>
+                {isAnalyzing ? "Extracting Commitments..." : "Extract Commitments with AI"}
+              </span>
             </button>
           </div>
         </div>
@@ -179,7 +187,9 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-16 text-slate-400 space-y-3">
               <Loader2 className="w-8 h-8 animate-spin text-[#0D9488]" />
-              <span className="text-xs font-medium text-[#115E59]">Loading commitments from backend...</span>
+              <span className="text-xs font-medium text-[#115E59]">
+                Loading commitments from backend...
+              </span>
             </div>
           ) : commitments.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center rounded-3xl border border-dashed border-[#B7E6DF] bg-white/70 p-8 space-y-4">
@@ -189,7 +199,8 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
               <div className="max-w-md">
                 <h4 className="text-base font-bold text-[#0F292B]">No commitments extracted yet</h4>
                 <p className="text-xs text-[#115E59] mt-1 leading-relaxed">
-                  Run the LangGraph AI Commitment Extraction Agent on this meeting to identify action items, assignees, deadlines, and verification confidence.
+                  Run the LangGraph AI Commitment Extraction Agent on this meeting to identify
+                  action items, assignees, deadlines, and verification confidence.
                 </p>
               </div>
               <button
@@ -197,7 +208,11 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
                 disabled={isAnalyzing}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-[#0D9488] hover:bg-[#0F766E] shadow-sm shadow-[#0D9488]/20 cursor-pointer disabled:opacity-50"
               >
-                {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                {isAnalyzing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Zap className="w-4 h-4" />
+                )}
                 Run AI Commitment Agent
               </button>
             </div>
@@ -261,7 +276,10 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
                           <div className="flex items-center gap-1 text-[#0D9488] font-mono font-medium">
                             <Sparkles className="w-3 h-3" />
                             <span>
-                              {Math.round(extractionConf > 1 ? extractionConf : extractionConf * 100)}% Extracted
+                              {Math.round(
+                                extractionConf > 1 ? extractionConf : extractionConf * 100,
+                              )}
+                              % Extracted
                             </span>
                           </div>
                         )}
@@ -270,7 +288,10 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
                           <div className="flex items-center gap-1 text-[#0F766E] font-mono font-semibold">
                             <ShieldCheck className="w-3.5 h-3.5 text-[#0D9488]" />
                             <span>
-                              {Math.round(verificationConf > 1 ? verificationConf : verificationConf * 100)}% Verified
+                              {Math.round(
+                                verificationConf > 1 ? verificationConf : verificationConf * 100,
+                              )}
+                              % Verified
                             </span>
                           </div>
                         )}

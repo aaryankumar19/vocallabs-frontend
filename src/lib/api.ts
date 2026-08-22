@@ -167,7 +167,9 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
       const errJson = await response.json();
       if (Array.isArray(errJson.detail)) {
         // FastAPI validation errors are arrays of {loc, msg, type}
-        errorDetail = errJson.detail.map((e: any) => e.msg || e.detail || JSON.stringify(e)).join("; ");
+        errorDetail = errJson.detail
+          .map((e: any) => e.msg || e.detail || JSON.stringify(e))
+          .join("; ");
       } else {
         errorDetail = errJson.detail || errJson.message || JSON.stringify(errJson);
       }
@@ -199,11 +201,14 @@ export async function getBackendHealth(): Promise<HealthResponse> {
 // --------------------------------------------------------------------------
 export async function authenticateUser(email: string, name: string) {
   // POST /api/v1/auth  (no trailing slash — confirmed in spec)
-  return request<{ auth_token: string; name: string; email: string; groups: Group[] }>("/api/v1/auth", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, name }),
-  });
+  return request<{ auth_token: string; name: string; email: string; groups: Group[] }>(
+    "/api/v1/auth",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, name }),
+    },
+  );
 }
 
 // --------------------------------------------------------------------------
@@ -290,14 +295,10 @@ export async function startGroupMeeting(
  * POST /api/v1/groups/{group_id}/meetings/{meeting_id}/end
  * Returns: GroupMeetingOut (200)
  */
-export async function endGroupMeeting(
-  groupId: string,
-  meetingId: string,
-): Promise<MeetingItem> {
-  return request<MeetingItem>(
-    `/api/v1/groups/${groupId}/meetings/${meetingId}/end`,
-    { method: "POST" },
-  );
+export async function endGroupMeeting(groupId: string, meetingId: string): Promise<MeetingItem> {
+  return request<MeetingItem>(`/api/v1/groups/${groupId}/meetings/${meetingId}/end`, {
+    method: "POST",
+  });
 }
 
 export async function getMeetingDetails(meetingId: string): Promise<MeetingItem> {
@@ -386,9 +387,7 @@ export async function getLiveKitToken(
  * Optionally pass group_id query param to scope to a group.
  */
 export async function getCommitments(groupId?: string): Promise<ApiCommitment[]> {
-  const url = groupId
-    ? `/api/v1/commitments?group_id=${groupId}`
-    : "/api/v1/commitments";
+  const url = groupId ? `/api/v1/commitments?group_id=${groupId}` : "/api/v1/commitments";
   const raw = await request<ApiCommitment[]>(url);
 
   // Normalize field name aliases for display components

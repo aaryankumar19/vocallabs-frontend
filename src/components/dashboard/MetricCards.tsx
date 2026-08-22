@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  CheckCircle2,
-  Clock,
-  Layers,
-  TrendingUp,
-  ShieldAlert,
-} from "lucide-react";
+import { CheckCircle2, Clock, Layers, TrendingUp, ShieldAlert } from "lucide-react";
 import { ApiCommitment } from "@/lib/api";
 
 interface MetricCardsProps {
@@ -13,10 +7,7 @@ interface MetricCardsProps {
   onFilterSelect?: (filter: string) => void;
 }
 
-export const MetricCards: React.FC<MetricCardsProps> = ({
-  commitments,
-  onFilterSelect,
-}) => {
+export const MetricCards: React.FC<MetricCardsProps> = ({ commitments, onFilterSelect }) => {
   const activeCount = commitments.filter((c) => {
     const s = (c.status || "").toLowerCase();
     return s.includes("progress") || s === "ongoing" || s === "pending";

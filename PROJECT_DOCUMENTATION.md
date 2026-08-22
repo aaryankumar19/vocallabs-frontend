@@ -4,11 +4,12 @@
 **Hackathon Track**: Generative AI, Multi-Agent Systems & Enterprise Productivity  
 **Target Submission**: Placement Drive / Technical Evaluation  
 **Author / Candidate**: Aaryan Kumar, Amit Krishna, Arif Khan ([@aaryanaks3](mailto:aaryanaks3@gmail.com))  
-**Date**: August 2026  
+**Date**: August 2026
 
 ---
 
 ## 📑 Table of Contents
+
 1. [Executive Summary](#1-executive-summary)
 2. [Problem Statement & Business Impact](#2-problem-statement--business-impact)
 3. [Proposed Solution & Core Value Proposition](#3-proposed-solution--core-value-proposition)
@@ -31,6 +32,7 @@
 In fast-paced engineering organizations, over **70% of actionable decisions and verbal commitments** made in voice meetings (standups, sprint plannings, architecture reviews) fail to translate into tracked tasks in project management tools. This disconnect causes missed deadlines, untracked blocker dependencies, and costly miscommunications.
 
 **VocalLabs** is an enterprise-grade, autonomous meeting intelligence platform designed to bridge this gap. VocalLabs combines **LiveKit WebRTC real-time audio rooms**, **OpenAI Whisper speech-to-text**, and **LangGraph Multi-Agent architectures** to:
+
 1. Capture real-time or recorded meeting conversations.
 2. Automatically extract structured action items, owners, and deadlines.
 3. Autonomously verify whether engineers have completed their commitments by querying external developer systems (e.g., GitHub pull requests and issues).
@@ -39,12 +41,12 @@ In fast-paced engineering organizations, over **70% of actionable decisions and 
 
 ## 2. Problem Statement & Business Impact
 
-| Bottleneck | Traditional Industry Workflow | VocalLabs Solution |
-| :--- | :--- | :--- |
-| **Manual Note Taking** | Developers take partial notes or forget key deliverables. | Automated, multi-lingual Whisper transcription with timestamped segments. |
-| **Commitment Loss** | "I will fix the auth bug by Friday" is forgotten after the call. | LangGraph Agent 1 detects commitments, assigning owners and deadlines. |
-| **Manual Follow-Ups** | Project managers spend hours asking "Is this done yet?" | LangGraph Agent 2 cross-references code repositories and GitHub PRs autonomously. |
-| **Accountability** | Status updates rely on subjective self-reporting. | Objective confidence scoring and evidence-backed completion verification. |
+| Bottleneck             | Traditional Industry Workflow                                    | VocalLabs Solution                                                                |
+| :--------------------- | :--------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
+| **Manual Note Taking** | Developers take partial notes or forget key deliverables.        | Automated, multi-lingual Whisper transcription with timestamped segments.         |
+| **Commitment Loss**    | "I will fix the auth bug by Friday" is forgotten after the call. | LangGraph Agent 1 detects commitments, assigning owners and deadlines.            |
+| **Manual Follow-Ups**  | Project managers spend hours asking "Is this done yet?"          | LangGraph Agent 2 cross-references code repositories and GitHub PRs autonomously. |
+| **Accountability**     | Status updates rely on subjective self-reporting.                | Objective confidence scoring and evidence-backed completion verification.         |
 
 ---
 
@@ -114,13 +116,14 @@ Agent 1 transforms unstructured meeting dialogue into structured relational enti
     "extraction_confidence": 0.95
   }
   ```
-- **Fault-Tolerant Heuristic Fallback**: In the event of API rate limits or offline modes, a regex-based linguistic heuristic engine analyzes modality verbs (*will, shall, promise, agree, submit, fix*) to ensure 0% data loss.
+- **Fault-Tolerant Heuristic Fallback**: In the event of API rate limits or offline modes, a regex-based linguistic heuristic engine analyzes modality verbs (_will, shall, promise, agree, submit, fix_) to ensure 0% data loss.
 
 ---
 
 ### 5.2 Overdue & Deadline Management
 
 Every commitment record in PostgreSQL maintains:
+
 - `created_at`: Timestamp when the commitment was voiced.
 - `deadline`: Absolute target datetime or relative semantic target.
 - `status`: Lifecycle state (`pending`, `in_progress`, `completed`, `at_risk`, `needs_review`).
@@ -182,6 +185,7 @@ The database schema is implemented in **PostgreSQL 15+** with relational integri
 ```
 
 ### Core Schema Highlights:
+
 - **`meetings`**: Stores meeting metadata, titles, and lifecycle status.
 - **`transcripts` & `transcript_segments`**: Stores word/phrase-level timestamps (`start_time_seconds`, `end_time_seconds`, `sequence_number`).
 - **`commitments`**: Stores extracted action items, `extraction_confidence`, `verification_confidence`, and deadline.
@@ -192,15 +196,15 @@ The database schema is implemented in **PostgreSQL 15+** with relational integri
 
 ## 7. Technology Stack & Architectural Rationale
 
-| Layer | Technology | Justification |
-| :--- | :--- | :--- |
-| **Frontend Framework** | React 19 + TanStack Router | Modern component architecture, type-safe routing, ultra-fast client-side transitions. |
-| **Styling & UI** | Tailwind CSS v4 + Radix UI | Accessible headless primitives styled with sleek dark-mode glassmorphism. |
-| **Real-time Audio** | LiveKit WebRTC Cloud | Sub-100ms ultra-low latency WebRTC voice streaming with tokenized room security. |
-| **Backend API** | Python FastAPI + Uvicorn | High-throughput asynchronous REST server with native Pydantic OpenAPI docs. |
-| **AI Multi-Agent** | LangGraph + LangChain | Deterministic state transitions, cycle support for tool loops, checkpointing, and auditability. |
-| **Speech-to-Text** | OpenAI Whisper | Industry-leading word accuracy and multi-lingual audio transcription. |
-| **Database** | PostgreSQL + SQLAlchemy ORM | ACID-compliant relational persistence with UUID indexing and JSONB evidence support. |
+| Layer                  | Technology                  | Justification                                                                                   |
+| :--------------------- | :-------------------------- | :---------------------------------------------------------------------------------------------- |
+| **Frontend Framework** | React 19 + TanStack Router  | Modern component architecture, type-safe routing, ultra-fast client-side transitions.           |
+| **Styling & UI**       | Tailwind CSS v4 + Radix UI  | Accessible headless primitives styled with sleek dark-mode glassmorphism.                       |
+| **Real-time Audio**    | LiveKit WebRTC Cloud        | Sub-100ms ultra-low latency WebRTC voice streaming with tokenized room security.                |
+| **Backend API**        | Python FastAPI + Uvicorn    | High-throughput asynchronous REST server with native Pydantic OpenAPI docs.                     |
+| **AI Multi-Agent**     | LangGraph + LangChain       | Deterministic state transitions, cycle support for tool loops, checkpointing, and auditability. |
+| **Speech-to-Text**     | OpenAI Whisper              | Industry-leading word accuracy and multi-lingual audio transcription.                           |
+| **Database**           | PostgreSQL + SQLAlchemy ORM | ACID-compliant relational persistence with UUID indexing and JSONB evidence support.            |
 
 ---
 
@@ -209,22 +213,26 @@ The database schema is implemented in **PostgreSQL 15+** with relational integri
 Interactive Swagger API documentation is available at `/docs`. Key contracts include:
 
 ### 1. Audio Processing & Transcription
+
 - `POST /meetings` (or `POST /api/v1/meetings/transcribe`)
   - **Payload**: `multipart/form-data` (`file: UploadFile`, `title: string`, `model: string`)
   - **Response**: `201 Created` with `meeting_id`, `transcript_id`, `language`, and `segments[]`.
 
 ### 2. Multi-Agent Commitment Extraction
+
 - `POST /commitments/analyze`
   - **Payload**: `{"meeting_id": "uuid"}`
   - **Process**: Executes LangGraph Commitment Extraction Graph.
   - **Response**: `200 OK` with extracted commitment objects and database IDs.
 
 ### 3. Autonomous Verification
+
 - `POST /commitments/{commitment_id}/verify`
   - **Process**: Executes LangGraph Verification ReAct Agent with GitHub tools.
   - **Response**: `200 OK` with verification reasoning, evidence URLs, and updated status.
 
 ### 4. Health & Subsystem Telemetry
+
 - `GET /api/v1/health`
   - **Response**: Database connection status and Whisper STT engine availability.
 
@@ -244,6 +252,7 @@ Interactive Swagger API documentation is available at `/docs`. Key contracts inc
 To evaluate the platform locally in **under 3 minutes**:
 
 ### Step 1: Start Backend
+
 ```bash
 cd vocallabs-backend
 python -m venv .venv
@@ -251,17 +260,21 @@ python -m venv .venv
 pip install -r requirements.txt
 python main.py
 ```
-*Backend API available at `http://localhost:8000` (Docs: `http://localhost:8000/docs`)*
+
+_Backend API available at `http://localhost:8000` (Docs: `http://localhost:8000/docs`)_
 
 ### Step 2: Start Frontend
+
 ```bash
 cd vocallabs-frontend
 npm install
 npm run dev
 ```
-*Frontend interface available at `http://localhost:5173` or `http://localhost:8080`*
+
+_Frontend interface available at `http://localhost:5173` or `http://localhost:8080`_
 
 ### Step 3: Run Standalone Agent Test Suites
+
 ```bash
 cd vocallabs-backend
 # Test Agent 1 (Extraction Graph)

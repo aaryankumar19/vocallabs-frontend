@@ -33,7 +33,10 @@ export const AppLayout: React.FC = () => {
 
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [commitments, setCommitments] = useState<ApiCommitment[]>([]);
-  const [groupMeetings, setGroupMeetings] = useState<{ ongoing: MeetingItem[]; past: MeetingItem[] }>({
+  const [groupMeetings, setGroupMeetings] = useState<{
+    ongoing: MeetingItem[];
+    past: MeetingItem[];
+  }>({
     ongoing: [],
     past: [],
   });
@@ -257,7 +260,8 @@ export const AppLayout: React.FC = () => {
                       </h2>
                     </div>
                     <p className="text-xs text-[#115E59]">
-                      Live connection configuration to the VocalLabs FastAPI server and LiveKit WebRTC subsystems.
+                      Live connection configuration to the VocalLabs FastAPI server and LiveKit
+                      WebRTC subsystems.
                     </p>
                   </div>
 
@@ -270,7 +274,9 @@ export const AppLayout: React.FC = () => {
                         </div>
                         <div>
                           <h4 className="text-sm font-bold text-[#0F292B]">FastAPI Core Server</h4>
-                          <p className="text-xs text-slate-500 font-mono break-all">{BACKEND_URL}</p>
+                          <p className="text-xs text-slate-500 font-mono break-all">
+                            {BACKEND_URL}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center justify-between pt-3 border-t border-[#D1F2EE] text-xs text-slate-500">
@@ -310,7 +316,9 @@ export const AppLayout: React.FC = () => {
                           <Radio className="w-5 h-5" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-[#0F292B]">Whisper Speech-to-Text</h4>
+                          <h4 className="text-sm font-bold text-[#0F292B]">
+                            Whisper Speech-to-Text
+                          </h4>
                           <p className="text-xs text-slate-500 font-mono">
                             {health?.whisper_stt?.url || "Remote Whisper STT API"}
                           </p>
@@ -331,8 +339,12 @@ export const AppLayout: React.FC = () => {
                           <Database className="w-5 h-5" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-[#0F292B]">Database &amp; R2 Storage</h4>
-                          <p className="text-xs text-slate-500">PostgreSQL transcripts &amp; Cloudflare R2 audio blobs</p>
+                          <h4 className="text-sm font-bold text-[#0F292B]">
+                            Database &amp; R2 Storage
+                          </h4>
+                          <p className="text-xs text-slate-500">
+                            PostgreSQL transcripts &amp; Cloudflare R2 audio blobs
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center justify-between pt-3 border-t border-[#D1F2EE] text-xs text-slate-500">
@@ -352,7 +364,9 @@ export const AppLayout: React.FC = () => {
                         </div>
                         <div>
                           <h4 className="text-sm font-bold text-[#0F292B]">Active User Identity</h4>
-                          <p className="text-xs text-slate-500">{currentUser?.email || "Authenticated"}</p>
+                          <p className="text-xs text-slate-500">
+                            {currentUser?.email || "Authenticated"}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center justify-between pt-3 border-t border-[#D1F2EE] text-xs text-slate-500">

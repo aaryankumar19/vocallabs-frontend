@@ -89,7 +89,9 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
     setSubmitError("");
 
     if (!selectedGroup) {
-      setSubmitError("You must select or create a group before starting a live meeting. Use the workspace switcher in the top bar.");
+      setSubmitError(
+        "You must select or create a group before starting a live meeting. Use the workspace switcher in the top bar.",
+      );
       return;
     }
 
@@ -102,7 +104,7 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
 
       if (!res.token || !res.livekit_url || !res.meeting_id || !res.room_name) {
         throw new Error(
-          `Backend returned incomplete room data. Got: meeting_id=${res.meeting_id}, token=${res.token ? "✓" : "✗"}, livekit_url=${res.livekit_url || "missing"}`
+          `Backend returned incomplete room data. Got: meeting_id=${res.meeting_id}, token=${res.token ? "✓" : "✗"}, livekit_url=${res.livekit_url || "missing"}`,
         );
       }
 
@@ -143,7 +145,10 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
       <div className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-[#B7E6DF] bg-[#F3FFFE]/98 p-6 sm:p-8 backdrop-blur-2xl shadow-2xl">
         {/* Close */}
         <button
-          onClick={() => { resetForm(); onClose(); }}
+          onClick={() => {
+            resetForm();
+            onClose();
+          }}
           className="absolute top-5 right-5 p-2 text-slate-400 hover:text-[#0F292B] rounded-xl hover:bg-[#D1F2EE] transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
@@ -174,28 +179,38 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
         <div className="grid grid-cols-2 gap-3 mb-5">
           <button
             type="button"
-            onClick={() => { setMode("upload"); setSubmitError(""); }}
+            onClick={() => {
+              setMode("upload");
+              setSubmitError("");
+            }}
             className={`flex flex-col items-center justify-center p-4 rounded-2xl border text-center transition-all cursor-pointer ${
               mode === "upload"
                 ? "border-[#0D9488] bg-[#D1F2EE] text-[#0F292B] shadow-xs font-semibold"
                 : "border-[#B7E6DF] bg-white text-slate-600 hover:border-[#0D9488] hover:text-[#0F292B]"
             }`}
           >
-            <Upload className={`w-6 h-6 mb-1.5 ${mode === "upload" ? "text-[#0D9488]" : "text-slate-400"}`} />
+            <Upload
+              className={`w-6 h-6 mb-1.5 ${mode === "upload" ? "text-[#0D9488]" : "text-slate-400"}`}
+            />
             <span className="text-xs font-bold">Upload Audio Recording</span>
             <span className="text-[11px] text-slate-500 mt-0.5">MP3, WAV, M4A, WEBM</span>
           </button>
 
           <button
             type="button"
-            onClick={() => { setMode("live"); setSubmitError(""); }}
+            onClick={() => {
+              setMode("live");
+              setSubmitError("");
+            }}
             className={`flex flex-col items-center justify-center p-4 rounded-2xl border text-center transition-all cursor-pointer ${
               mode === "live"
                 ? "border-[#0D9488] bg-[#D1F2EE] text-[#0F292B] shadow-xs font-semibold"
                 : "border-[#B7E6DF] bg-white text-slate-600 hover:border-[#0D9488] hover:text-[#0F292B]"
             }`}
           >
-            <Radio className={`w-6 h-6 mb-1.5 text-rose-500 ${mode === "live" ? "animate-pulse" : ""}`} />
+            <Radio
+              className={`w-6 h-6 mb-1.5 text-rose-500 ${mode === "live" ? "animate-pulse" : ""}`}
+            />
             <span className="text-xs font-bold">Start Live Audio Room</span>
             <span className="text-[11px] text-slate-500 mt-0.5">LiveKit Voice &amp; Chat</span>
           </button>
@@ -214,7 +229,8 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
           <div className="mb-4 p-3.5 rounded-2xl bg-[#F9EAF0] border border-[#B7E6DF] text-[#9D174D] text-xs flex items-start gap-2.5">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#BE185D]" />
             <span>
-              A workspace (group) is required to start a live meeting. Use the group switcher in the top navigation bar to create or select a group first.
+              A workspace (group) is required to start a live meeting. Use the group switcher in the
+              top navigation bar to create or select a group first.
             </span>
           </div>
         )}
@@ -224,7 +240,8 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
           <form onSubmit={handleTranscribeAudio} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-[#115E59] mb-1.5">
-                Meeting Title <span className="text-slate-400 font-normal normal-case">(optional)</span>
+                Meeting Title{" "}
+                <span className="text-slate-400 font-normal normal-case">(optional)</span>
               </label>
               <input
                 type="text"
@@ -253,14 +270,18 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
                 <FileAudio className="w-8 h-8 text-[#0D9488] mb-2" />
                 {selectedFile ? (
                   <div>
-                    <span className="block text-xs font-bold text-[#0F292B]">{selectedFile.name}</span>
+                    <span className="block text-xs font-bold text-[#0F292B]">
+                      {selectedFile.name}
+                    </span>
                     <span className="block text-[11px] text-[#115E59] mt-0.5">
                       {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • Click to change
                     </span>
                   </div>
                 ) : (
                   <div>
-                    <span className="block text-xs font-semibold text-[#0F292B]">Click to select audio file</span>
+                    <span className="block text-xs font-semibold text-[#0F292B]">
+                      Click to select audio file
+                    </span>
                     <span className="block text-[11px] text-slate-500 mt-0.5">
                       Whisper STT will transcribe and extract commitments automatically
                     </span>
@@ -279,7 +300,10 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
             <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#D1F2EE]">
               <button
                 type="button"
-                onClick={() => { resetForm(); onClose(); }}
+                onClick={() => {
+                  resetForm();
+                  onClose();
+                }}
                 className="px-4 py-2 rounded-xl text-xs font-medium text-[#115E59] hover:text-[#0F292B] cursor-pointer"
               >
                 Cancel
@@ -289,7 +313,11 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
                 disabled={isProcessing || !selectedFile}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-[#0D9488] via-[#0891B2] to-[#0284C7] hover:from-[#0F766E] hover:to-[#0369A1] shadow-sm shadow-[#0D9488]/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
               >
-                {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {isProcessing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4" />
+                )}
                 Transcribe &amp; Extract
               </button>
             </div>
@@ -299,13 +327,18 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
           <form onSubmit={handleStartLiveMeeting} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-[#115E59] mb-1.5">
-                Session Title <span className="text-slate-400 font-normal normal-case">(optional)</span>
+                Session Title{" "}
+                <span className="text-slate-400 font-normal normal-case">(optional)</span>
               </label>
               <input
                 type="text"
                 value={meetingTitle}
                 onChange={(e) => setMeetingTitle(e.target.value)}
-                placeholder={selectedGroup ? `Live ${selectedGroup.name} Session` : "e.g. Weekly Standup, Client Sync"}
+                placeholder={
+                  selectedGroup
+                    ? `Live ${selectedGroup.name} Session`
+                    : "e.g. Weekly Standup, Client Sync"
+                }
                 className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#B7E6DF] text-sm text-[#0F292B] placeholder-slate-400 focus:bg-white focus:outline-none focus:border-[#0D9488] focus:ring-2 focus:ring-[#D1F2EE]"
               />
             </div>
@@ -333,7 +366,10 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
             <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#D1F2EE]">
               <button
                 type="button"
-                onClick={() => { resetForm(); onClose(); }}
+                onClick={() => {
+                  resetForm();
+                  onClose();
+                }}
                 className="px-4 py-2 rounded-xl text-xs font-medium text-[#115E59] hover:text-[#0F292B] cursor-pointer"
               >
                 Cancel

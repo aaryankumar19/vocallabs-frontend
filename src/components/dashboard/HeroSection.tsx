@@ -41,7 +41,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
           <p className="text-sm sm:text-base text-[#115E59] max-w-xl leading-relaxed">
             {groupName ? `Active Workspace: ${groupName}. ` : ""}
-            Audio recorded in meetings is transcribed via Whisper STT, and commitment follow-throughs are autonomously evaluated.
+            Audio recorded in meetings is transcribed via Whisper STT, and commitment
+            follow-throughs are autonomously evaluated.
           </p>
 
           {/* Action buttons */}
@@ -85,7 +86,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     <span className="block text-xs font-bold text-[#0F292B]">
                       LiveKit &amp; Whisper STT
                     </span>
-                    <span className="block text-[10px] text-slate-500">Speech-to-Text Transcription</span>
+                    <span className="block text-[10px] text-slate-500">
+                      Speech-to-Text Transcription
+                    </span>
                   </div>
                 </div>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-[#0284C7] font-semibold border border-[#B7E6DF]/50">

@@ -46,7 +46,11 @@ export const CommitmentsTable: React.FC<CommitmentsTableProps> = ({
 
   const getConfidencePercentage = (comm: ApiCommitment): number => {
     if (comm.verification_confidence !== null && comm.verification_confidence !== undefined) {
-      return Math.round(comm.verification_confidence > 1 ? comm.verification_confidence : comm.verification_confidence * 100);
+      return Math.round(
+        comm.verification_confidence > 1
+          ? comm.verification_confidence
+          : comm.verification_confidence * 100,
+      );
     }
     if (comm.confidence !== null && comm.confidence !== undefined) {
       return Math.round(comm.confidence > 1 ? comm.confidence : comm.confidence * 100);

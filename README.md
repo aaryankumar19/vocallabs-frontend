@@ -139,11 +139,13 @@ Before running the project locally, ensure you have the following installed:
 ### 1. Backend Setup (FastAPI + LangGraph + Whisper)
 
 1. **Navigate to the backend directory**:
+
    ```bash
    cd vocallabs-backend
    ```
 
 2. **Create and activate a Python virtual environment**:
+
    ```bash
    # Windows (PowerShell)
    python -m venv .venv
@@ -155,12 +157,14 @@ Before running the project locally, ensure you have the following installed:
    ```
 
 3. **Install Python dependencies**:
+
    ```bash
    pip install -r requirements.txt
    ```
 
 4. **Configure Environment Variables**:
    Create a `.env` file in `vocallabs-backend/`:
+
    ```env
    DATABASE_URL=postgresql://postgres:postgres@localhost:5432/vocallabs
    OPENAI_API_KEY=sk-proj-your-openai-api-key
@@ -175,24 +179,27 @@ Before running the project locally, ensure you have the following installed:
    ```bash
    python main.py
    ```
-   *The backend will start at `http://localhost:8000` with interactive Swagger docs at `http://localhost:8000/docs`.*
+   _The backend will start at `http://localhost:8000` with interactive Swagger docs at `http://localhost:8000/docs`._
 
 ---
 
 ### 2. Frontend Setup (React 19 + TanStack + Tailwind)
 
 1. **Navigate to the frontend directory**:
+
    ```bash
    cd vocallabs-frontend
    ```
 
 2. **Install Node dependencies**:
+
    ```bash
    npm install
    ```
 
 3. **Configure Environment Variables**:
    Create a `.env` file in `vocallabs-frontend/`:
+
    ```env
    # Backend API Endpoint
    VITE_FASTAPI_BACKEND_URL=http://localhost:8000
@@ -210,13 +217,14 @@ Before running the project locally, ensure you have the following installed:
    ```bash
    npm run dev
    ```
-   *The frontend dashboard will be available at `http://localhost:5173` or `http://localhost:8080`.*
+   _The frontend dashboard will be available at `http://localhost:5173` or `http://localhost:8080`._
 
 ---
 
 ## 🤖 AI Multi-Agent Workflows
 
 ### 1. Commitment Extraction Agent
+
 The Commitment Extraction Agent processes meeting transcripts through a compiled **LangGraph `StateGraph`**:
 
 ```
@@ -228,6 +236,7 @@ The Commitment Extraction Agent processes meeting transcripts through a compiled
 - **`format`**: Validates fields, associates the `meeting_id`, and writes records to the `commitments` and `agent_runs` database tables.
 
 ### 2. Verification Agent (GitHub Search)
+
 The Verification Agent is a stateful LangGraph agent equipped with tool execution nodes:
 
 ```
@@ -247,18 +256,18 @@ The Verification Agent is a stateful LangGraph agent equipped with tool executio
 
 ### Core Endpoints
 
-| Method | Route | Description |
-| :--- | :--- | :--- |
-| `GET` | `/` | API status and root routing metadata |
-| `GET` | `/api/v1/health` | Healthcheck (PostgreSQL connectivity & Whisper STT status) |
-| `POST`| `/meetings` or `/meetings/transcribe` | Upload audio file (`multipart/form-data`) & run Whisper STT |
-| `GET` | `/meetings/{meeting_id}` | Retrieve meeting metadata |
-| `GET` | `/api/v1/transcripts/meeting/{meeting_id}` | Retrieve transcript and all timestamped segments |
-| `POST`| `/commitments/analyze` | Trigger LangGraph Commitment Extraction on a meeting |
-| `GET` | `/commitments/meeting/{meeting_id}` | List extracted commitments for a meeting |
-| `POST`| `/commitments/{commitment_id}/verify` | Run LangGraph Verification Agent on a commitment |
+| Method | Route                                      | Description                                                 |
+| :----- | :----------------------------------------- | :---------------------------------------------------------- |
+| `GET`  | `/`                                        | API status and root routing metadata                        |
+| `GET`  | `/api/v1/health`                           | Healthcheck (PostgreSQL connectivity & Whisper STT status)  |
+| `POST` | `/meetings` or `/meetings/transcribe`      | Upload audio file (`multipart/form-data`) & run Whisper STT |
+| `GET`  | `/meetings/{meeting_id}`                   | Retrieve meeting metadata                                   |
+| `GET`  | `/api/v1/transcripts/meeting/{meeting_id}` | Retrieve transcript and all timestamped segments            |
+| `POST` | `/commitments/analyze`                     | Trigger LangGraph Commitment Extraction on a meeting        |
+| `GET`  | `/commitments/meeting/{meeting_id}`        | List extracted commitments for a meeting                    |
+| `POST` | `/commitments/{commitment_id}/verify`      | Run LangGraph Verification Agent on a commitment            |
 
-*Complete interactive schema definitions and playground are accessible at `/docs`.*
+_Complete interactive schema definitions and playground are accessible at `/docs`._
 
 ---
 
@@ -266,29 +275,29 @@ The Verification Agent is a stateful LangGraph agent equipped with tool executio
 
 ### Backend (`vocallabs-backend/.env`)
 
-| Variable | Type | Description | Default |
-| :--- | :--- | :--- | :--- |
-| `DATABASE_URL` | `string` | PostgreSQL connection URI | `postgresql://postgres:postgres@localhost:5432/vocallabs` |
-| `HOST` | `string` | Bind host address | `0.0.0.0` |
-| `PORT` | `integer`| Bind port | `8000` |
-| `OPENAI_API_KEY` | `string` | OpenAI API key for LLM and Whisper | — |
-| `OPENAI_BASE_URL`| `string` | Custom OpenAI base URL (optional) | — |
-| `LLM_MODEL` | `string` | Model used for extraction and verification | `gpt-4o-mini` |
-| `GITHUB_TOKEN` | `string` | GitHub Personal Access Token for PR search | — |
-| `LOCAL_WHISPER_MODEL` | `string` | Whisper model size (`tiny`, `base`, `small`, `medium`, `large`) | `small` |
-| `LIVEKIT_URL` | `string` | LiveKit Server / Cloud URL | — |
-| `LIVEKIT_API_KEY` | `string` | LiveKit API Key | — |
-| `LIVEKIT_API_SECRET` | `string` | LiveKit API Secret | — |
+| Variable              | Type      | Description                                                     | Default                                                   |
+| :-------------------- | :-------- | :-------------------------------------------------------------- | :-------------------------------------------------------- |
+| `DATABASE_URL`        | `string`  | PostgreSQL connection URI                                       | `postgresql://postgres:postgres@localhost:5432/vocallabs` |
+| `HOST`                | `string`  | Bind host address                                               | `0.0.0.0`                                                 |
+| `PORT`                | `integer` | Bind port                                                       | `8000`                                                    |
+| `OPENAI_API_KEY`      | `string`  | OpenAI API key for LLM and Whisper                              | —                                                         |
+| `OPENAI_BASE_URL`     | `string`  | Custom OpenAI base URL (optional)                               | —                                                         |
+| `LLM_MODEL`           | `string`  | Model used for extraction and verification                      | `gpt-4o-mini`                                             |
+| `GITHUB_TOKEN`        | `string`  | GitHub Personal Access Token for PR search                      | —                                                         |
+| `LOCAL_WHISPER_MODEL` | `string`  | Whisper model size (`tiny`, `base`, `small`, `medium`, `large`) | `small`                                                   |
+| `LIVEKIT_URL`         | `string`  | LiveKit Server / Cloud URL                                      | —                                                         |
+| `LIVEKIT_API_KEY`     | `string`  | LiveKit API Key                                                 | —                                                         |
+| `LIVEKIT_API_SECRET`  | `string`  | LiveKit API Secret                                              | —                                                         |
 
 ### Frontend (`vocallabs-frontend/.env`)
 
-| Variable | Type | Description | Default |
-| :--- | :--- | :--- | :--- |
-| `VITE_FASTAPI_BACKEND_URL` | `string` | FastAPI backend URL | `http://localhost:8000` |
-| `VITE_LIVEKIT_URL` | `string` | LiveKit WebRTC Cloud URL | — |
-| `VITE_GOOGLE_CLIENT_ID` | `string` | Google OAuth Client ID | — |
-| `VITE_GOOGLE_CLIENT_SECRET` | `string` | Google OAuth Client Secret | — |
-| `VITE_GOOGLE_CALLBACK_URL` | `string` | Google OAuth Callback URL | `http://localhost:8080/auth/callback` |
+| Variable                    | Type     | Description                | Default                               |
+| :-------------------------- | :------- | :------------------------- | :------------------------------------ |
+| `VITE_FASTAPI_BACKEND_URL`  | `string` | FastAPI backend URL        | `http://localhost:8000`               |
+| `VITE_LIVEKIT_URL`          | `string` | LiveKit WebRTC Cloud URL   | —                                     |
+| `VITE_GOOGLE_CLIENT_ID`     | `string` | Google OAuth Client ID     | —                                     |
+| `VITE_GOOGLE_CLIENT_SECRET` | `string` | Google OAuth Client Secret | —                                     |
+| `VITE_GOOGLE_CALLBACK_URL`  | `string` | Google OAuth Callback URL  | `http://localhost:8080/auth/callback` |
 
 ---
 
@@ -297,18 +306,22 @@ The Verification Agent is a stateful LangGraph agent equipped with tool executio
 Test scripts are provided in `vocallabs-backend` to test individual agent graphs without starting the frontend:
 
 ### Test Commitment Extraction Agent
+
 ```bash
 cd vocallabs-backend
 python test_commitment_agent.py
 ```
-*Extracts commitments from sample transcripts and asserts database insertion.*
+
+_Extracts commitments from sample transcripts and asserts database insertion._
 
 ### Test Verification Agent with GitHub Search
+
 ```bash
 cd vocallabs-backend
 python test_verification_agent.py
 ```
-*Simulates agent execution searching GitHub for issue/PR evidence and returns the agent's trajectory.*
+
+_Simulates agent execution searching GitHub for issue/PR evidence and returns the agent's trajectory._
 
 ---
 

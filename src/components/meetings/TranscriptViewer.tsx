@@ -33,9 +33,7 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({ transcript }
               </span>
               {line.timestamp && <span className="text-slate-400">{line.timestamp}</span>}
             </div>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed pl-2">
-              "{line.text}"
-            </p>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed pl-2">"{line.text}"</p>
           </div>
         ))}
       </div>

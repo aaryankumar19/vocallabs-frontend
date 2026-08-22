@@ -44,7 +44,10 @@ export const CommitmentDrawer: React.FC<CommitmentDrawerProps> = ({
   };
 
   const getConfidence = (): number => {
-    if (commitment.verification_confidence !== null && commitment.verification_confidence !== undefined) {
+    if (
+      commitment.verification_confidence !== null &&
+      commitment.verification_confidence !== undefined
+    ) {
       return Math.round(
         commitment.verification_confidence > 1
           ? commitment.verification_confidence
@@ -127,7 +130,8 @@ export const CommitmentDrawer: React.FC<CommitmentDrawerProps> = ({
             <div className="grid grid-cols-2 gap-3 p-4 rounded-2xl bg-white border border-[#B7E6DF] mb-6 text-xs shadow-2xs">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-[#D1F2EE] border border-[#B7E6DF] flex items-center justify-center font-bold text-[#0D9488]">
-                  {(commitment.owner || commitment.assignee || "AI")?.charAt(0).toUpperCase() ?? "A"}
+                  {(commitment.owner || commitment.assignee || "AI")?.charAt(0).toUpperCase() ??
+                    "A"}
                 </div>
                 <div>
                   <span className="block text-[10px] text-slate-500">Assigned To</span>
