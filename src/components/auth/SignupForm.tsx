@@ -44,16 +44,28 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin }) => {
     }
     setGoogleLoading(true);
     initiateGoogleLogin(
-      () => { setGoogleLoading(false); navigate({ to: "/dashboard" }); },
-      (msg) => { setGoogleLoading(false); setError(msg); },
+      () => {
+        setGoogleLoading(false);
+        navigate({ to: "/dashboard" });
+      },
+      (msg) => {
+        setGoogleLoading(false);
+        setError(msg);
+      },
     );
   };
 
   const handleForceGoogleAuth = () => {
     setGoogleLoading(true);
     initiateGoogleLogin(
-      () => { setGoogleLoading(false); navigate({ to: "/dashboard" }); },
-      (msg) => { setGoogleLoading(false); setError(msg); },
+      () => {
+        setGoogleLoading(false);
+        navigate({ to: "/dashboard" });
+      },
+      (msg) => {
+        setGoogleLoading(false);
+        setError(msg);
+      },
     );
   };
 
@@ -98,7 +110,11 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin }) => {
       navigate({ to: "/dashboard" });
     } catch (err: unknown) {
       setLoading(false);
-      setError(err instanceof Error ? err.message : "FastAPI registration failed. Please check backend server.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "FastAPI registration failed. Please check backend server.",
+      );
     }
   }
 

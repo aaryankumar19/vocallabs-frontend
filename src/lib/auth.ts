@@ -30,10 +30,7 @@ export const FASTAPI_BACKEND_URL =
 export const GOOGLE_CLIENT_ID = (import.meta.env["VITE_GOOGLE_CLIENT_ID"] as string) || "";
 
 export function isGoogleConfigured(): boolean {
-  return (
-    Boolean(GOOGLE_CLIENT_ID) &&
-    !GOOGLE_CLIENT_ID.includes("YOUR_GOOGLE_CLIENT_ID")
-  );
+  return Boolean(GOOGLE_CLIENT_ID) && !GOOGLE_CLIENT_ID.includes("YOUR_GOOGLE_CLIENT_ID");
 }
 
 // -----------------------------------------------------------------------
@@ -58,7 +55,7 @@ export async function authenticateWithBackend(
   });
 
   if (!response.ok) {
-    const errJson = await response.json().catch(() => ({})) as Record<string, unknown>;
+    const errJson = (await response.json().catch(() => ({}))) as Record<string, unknown>;
     throw new Error(
       (errJson["detail"] as string) ||
         (errJson["message"] as string) ||
@@ -66,7 +63,7 @@ export async function authenticateWithBackend(
     );
   }
 
-  const data = await response.json() as Record<string, unknown>;
+  const data = (await response.json()) as Record<string, unknown>;
 
   // Backend returns: { auth_token, name, email, groups }
   const session: AuthSession = {
@@ -157,7 +154,7 @@ export async function fetchGoogleUserInfo(accessToken: string): Promise<{
   };
 
   const email = data.email ?? "";
-  const name = data.name ?? (email.split("@")[0] ?? email);
+  const name = data.name ?? email.split("@")[0] ?? email;
   const picture = data.picture;
 
   return { email, name, picture };
@@ -230,7 +227,7 @@ export async function handleCredential(
 ): Promise<void> {
   const payload = decodeJwtPayload(credential);
   const email: string = payload["email"] ?? "";
-  const nameFallback: string = (email.split("@")[0]) ?? email;
+  const nameFallback: string = email.split("@")[0] ?? email;
   const name: string = payload["name"] ?? payload["given_name"] ?? nameFallback;
   const picture: string | undefined = payload["picture"];
 
@@ -243,11 +240,7 @@ export async function handleCredential(
     const session = await authenticateWithBackend(email, name, picture);
     onSuccess(session);
   } catch (err: unknown) {
-    onError(
-      err instanceof Error
-        ? err.message
-        : "Failed to authenticate with backend server.",
-    );
+    onError(err instanceof Error ? err.message : "Failed to authenticate with backend server.");
   }
 }
 
@@ -364,9 +357,7 @@ export function logout(): void {
   }
 }
 
-export function onAuthStateChanged(
-  callback: (session: AuthSession | null) => void,
-): () => void {
+export function onAuthStateChanged(callback: (session: AuthSession | null) => void): () => void {
   if (typeof window === "undefined") return () => {};
 
   const handler = (e: Event) => {
@@ -393,10 +384,7 @@ export function onAuthStateChanged(
 // Legacy email helpers (backend uses email as identity, no passwords)
 // -----------------------------------------------------------------------
 
-export async function loginWithEmail(
-  email: string,
-  _password: string,
-): Promise<AuthSession> {
+export async function loginWithEmail(email: string, _password: string): Promise<AuthSession> {
   return authenticateWithBackend(email, email.split("@")[0] ?? email);
 }
 

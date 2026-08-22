@@ -48,8 +48,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
     badge?: string;
   }[] = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
-    { id: "meetings", label: "Meetings", icon: Video, ...(meetingsCount > 0 ? { badge: String(meetingsCount) } : {}) },
-    { id: "commitments", label: "Commitments", icon: CheckSquare, ...(commitmentsCount > 0 ? { badge: String(commitmentsCount) } : {}) },
+    {
+      id: "meetings",
+      label: "Meetings",
+      icon: Video,
+      ...(meetingsCount > 0 ? { badge: String(meetingsCount) } : {}),
+    },
+    {
+      id: "commitments",
+      label: "Commitments",
+      icon: CheckSquare,
+      ...(commitmentsCount > 0 ? { badge: String(commitmentsCount) } : {}),
+    },
     { id: "settings", label: "Backend & Setup", icon: Settings },
   ];
 

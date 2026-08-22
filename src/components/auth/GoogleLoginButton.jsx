@@ -50,7 +50,9 @@ export function GoogleLoginButton() {
         </div>
         <div>
           <h1 className="text-2xl font-extrabold text-[#0F292B] tracking-tight">VocalLabs</h1>
-          <p className="text-sm text-[#115E59] mt-1 font-medium">Autonomous Post-Meeting Intelligence</p>
+          <p className="text-sm text-[#115E59] mt-1 font-medium">
+            Autonomous Post-Meeting Intelligence
+          </p>
         </div>
       </div>
 
@@ -58,7 +60,9 @@ export function GoogleLoginButton() {
       <div className="w-full rounded-3xl border border-[#B7E6DF] bg-[#F3FFFE]/95 backdrop-blur-2xl shadow-xl shadow-[#0D9488]/5 p-8 flex flex-col gap-6">
         <div className="text-center">
           <h2 className="text-lg font-bold text-[#0F292B]">Sign in to continue</h2>
-          <p className="text-xs text-[#115E59] mt-1">Access your workspace meetings and follow-throughs.</p>
+          <p className="text-xs text-[#115E59] mt-1">
+            Access your workspace meetings and follow-throughs.
+          </p>
         </div>
 
         {/* Error Notification */}
@@ -104,7 +108,9 @@ export function GoogleLoginButton() {
         {/* Divider */}
         <div className="flex items-center gap-3">
           <div className="flex-1 border-t border-[#B7E6DF]" />
-          <span className="text-[10px] uppercase tracking-widest text-[#115E59] font-semibold">or</span>
+          <span className="text-[10px] uppercase tracking-widest text-[#115E59] font-semibold">
+            or
+          </span>
           <div className="flex-1 border-t border-[#B7E6DF]" />
         </div>
 
@@ -120,7 +126,9 @@ export function GoogleLoginButton() {
           ) : (
             <Sparkles className="w-3.5 h-3.5 text-[#0D9488]" />
           )}
-          <span>{demoLoading ? "Authenticating with Backend..." : "Continue with Fast Demo Access"}</span>
+          <span>
+            {demoLoading ? "Authenticating with Backend..." : "Continue with Fast Demo Access"}
+          </span>
         </button>
       </div>
 

@@ -17,8 +17,10 @@ import {
   Group,
   getGroupMeetings,
   endGroupMeeting,
+  getLiveKitToken,
   ApiCommitment,
 } from "@/lib/api";
+import { getAuthUser } from "@/lib/auth";
 import { MeetingDetailModal } from "./MeetingDetailModal";
 import { toast } from "sonner";
 
@@ -81,12 +83,31 @@ export const MeetingsList: React.FC<MeetingsListProps> = ({
     }
   };
 
-  const handleJoinLive = (e: React.MouseEvent, m: MeetingItem) => {
+  const handleJoinLive = async (e: React.MouseEvent, m: MeetingItem) => {
     e.stopPropagation();
-    if (onEnterLiveRoom) {
+    if (!onEnterLiveRoom) return;
+
+    const roomName = m.external_id || `room-${m.id.slice(0, 8)}`;
+
+    try {
+      const user = getAuthUser();
+      const identity = user?.email || user?.id || `user-${Date.now().toString(36)}`;
+      const displayName = user?.name || user?.email?.split("@")[0] || "Participant";
+
+      const tokenRes = await getLiveKitToken(roomName, identity, displayName, selectedGroup?.id);
+
       onEnterLiveRoom({
         meetingId: m.id,
-        roomName: m.external_id || `room-${m.id.slice(0, 8)}`,
+        roomName: roomName,
+        token: tokenRes.token,
+        livekitUrl: tokenRes.livekit_url,
+        title: m.title,
+      });
+    } catch (err: any) {
+      console.warn("Could not pre-fetch LiveKit token, falling back to in-room fetch:", err);
+      onEnterLiveRoom({
+        meetingId: m.id,
+        roomName: roomName,
         title: m.title,
       });
     }
@@ -146,7 +167,10 @@ export const MeetingsList: React.FC<MeetingsListProps> = ({
                           <span>Live Session Active</span>
                         </div>
                         <span className="text-[11px] font-mono text-slate-500">
-                          {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(m.created_at).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                         </span>
                       </div>
 
@@ -196,7 +220,8 @@ export const MeetingsList: React.FC<MeetingsListProps> = ({
                 <Video className="w-10 h-10 text-[#0D9488]/60 mx-auto mb-3" />
                 <h4 className="text-sm font-bold text-[#0F292B]">No meetings recorded yet</h4>
                 <p className="text-xs text-[#115E59] mt-1 max-w-sm mx-auto">
-                  Upload an audio recording or start a live room to automatically extract commitments.
+                  Upload an audio recording or start a live room to automatically extract
+                  commitments.
                 </p>
                 <button
                   onClick={onOpenNewMeeting}

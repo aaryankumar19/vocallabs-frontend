@@ -7,14 +7,7 @@ import {
   setAuthSession,
   FASTAPI_BACKEND_URL,
 } from "@/lib/auth";
-import {
-  Loader2,
-  CheckCircle2,
-  AlertTriangle,
-  ArrowRight,
-  Server,
-  Sparkles,
-} from "lucide-react";
+import { Loader2, CheckCircle2, AlertTriangle, ArrowRight, Server, Sparkles } from "lucide-react";
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -34,9 +27,7 @@ export default function AuthCallback() {
 
         if (error) {
           setStatus("error");
-          setErrorMessage(
-            errorDescription || `Google authentication was rejected (${error}).`,
-          );
+          setErrorMessage(errorDescription || `Google authentication was rejected (${error}).`);
           return;
         }
 
@@ -62,8 +53,7 @@ export default function AuthCallback() {
         }
 
         // 2. Check for access_token from Google OAuth
-        const accessToken =
-          hashParams.get("access_token") || urlParams.get("access_token");
+        const accessToken = hashParams.get("access_token") || urlParams.get("access_token");
         if (accessToken) {
           const profile = await fetchGoogleUserInfo(accessToken);
           if (profile.email) {

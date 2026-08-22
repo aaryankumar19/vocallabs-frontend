@@ -44,7 +44,9 @@ export const FollowThroughPipeline: React.FC<FollowThroughPipelineProps> = ({
 
   const getConf = (c: ApiCommitment) => {
     if (c.verification_confidence !== null && c.verification_confidence !== undefined) {
-      return Math.round(c.verification_confidence > 1 ? c.verification_confidence : c.verification_confidence * 100);
+      return Math.round(
+        c.verification_confidence > 1 ? c.verification_confidence : c.verification_confidence * 100,
+      );
     }
     if (c.confidence !== null && c.confidence !== undefined) {
       return Math.round(c.confidence > 1 ? c.confidence : c.confidence * 100);
@@ -63,9 +65,7 @@ export const FollowThroughPipeline: React.FC<FollowThroughPipelineProps> = ({
               Commitment Follow-Through Trace
             </h3>
           </div>
-          <p className="text-xs text-[#115E59]">
-            Live telemetry and agent evaluation pipeline.
-          </p>
+          <p className="text-xs text-[#115E59]">Live telemetry and agent evaluation pipeline.</p>
         </div>
 
         {/* Trace Item Selector tabs */}
@@ -117,7 +117,9 @@ export const FollowThroughPipeline: React.FC<FollowThroughPipelineProps> = ({
                 {activeItem.title}
               </span>
               {activeItem.description && (
-                <span className="block text-[10px] text-slate-500 line-clamp-1">{activeItem.description}</span>
+                <span className="block text-[10px] text-slate-500 line-clamp-1">
+                  {activeItem.description}
+                </span>
               )}
             </div>
             <div className="mt-3 pt-2 border-t border-[#B7E6DF]/70 text-[10px] text-[#0D9488] font-mono font-medium">

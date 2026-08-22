@@ -64,7 +64,9 @@ export const AIAgentPanel: React.FC<AIAgentPanelProps> = ({ compact = false, cla
       {/* Live trace stream indicator */}
       <div className="mt-3 flex items-center gap-2 px-2 py-1.5 rounded-lg bg-indigo-50/70 border border-indigo-100 text-[11px] text-slate-700">
         <Sparkles className="w-3.5 h-3.5 text-indigo-600 shrink-0 animate-pulse" />
-        <span className="truncate text-slate-700">Auto-tracking commitments &amp; action items</span>
+        <span className="truncate text-slate-700">
+          Auto-tracking commitments &amp; action items
+        </span>
       </div>
     </div>
   );

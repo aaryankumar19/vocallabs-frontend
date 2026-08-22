@@ -20,7 +20,9 @@ export const CommitmentsWorkspace: React.FC<CommitmentsWorkspaceProps> = ({
   commitments,
   onSelectCommitment,
 }) => {
-  const [filterTab, setFilterTab] = useState<"all" | "in-progress" | "completed" | "at-risk">("all");
+  const [filterTab, setFilterTab] = useState<"all" | "in-progress" | "completed" | "at-risk">(
+    "all",
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"created" | "confidence">("created");
 
@@ -33,7 +35,12 @@ export const CommitmentsWorkspace: React.FC<CommitmentsWorkspaceProps> = ({
       if (filterTab === "completed" && !status.includes("complete") && status !== "done") {
         return false;
       }
-      if (filterTab === "at-risk" && !status.includes("risk") && !status.includes("blocked") && !status.includes("pending")) {
+      if (
+        filterTab === "at-risk" &&
+        !status.includes("risk") &&
+        !status.includes("blocked") &&
+        !status.includes("pending")
+      ) {
         return false;
       }
 
@@ -62,7 +69,9 @@ export const CommitmentsWorkspace: React.FC<CommitmentsWorkspaceProps> = ({
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="w-2 h-2 rounded-full bg-[#0D9488]" />
-            <h2 className="text-xl font-bold tracking-tight text-[#0F292B]">Commitments Workspace</h2>
+            <h2 className="text-xl font-bold tracking-tight text-[#0F292B]">
+              Commitments Workspace
+            </h2>
           </div>
           <p className="text-xs text-[#115E59]">
             Autonomous post-meeting tracking, evidence verification, and AI follow-through.
