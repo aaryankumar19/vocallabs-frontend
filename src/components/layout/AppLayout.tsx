@@ -87,9 +87,10 @@ export const AppLayout: React.FC = () => {
       setCommitments(commsData || []);
       setHealth(healthData);
 
-      if (groupsData.length > 0) {
-        setSelectedGroup(groupsData[0]);
-        await loadMeetings(groupsData[0].id);
+      const firstGroup = groupsData[0] ?? null;
+      if (firstGroup) {
+        setSelectedGroup(firstGroup);
+        await loadMeetings(firstGroup.id);
       }
     } catch (err) {
       console.error("Failed to load dashboard data:", err);
@@ -145,11 +146,11 @@ export const AppLayout: React.FC = () => {
   const totalMeetingsCount = groupMeetings.ongoing.length + groupMeetings.past.length;
 
   return (
-    <div className="min-h-screen bg-[#050816] text-[#F8FAFC] flex overflow-x-hidden selection:bg-cyan-500/30 selection:text-white">
-      {/* Dark Atmospheric Ambient Glows */}
-      <div className="fixed top-0 left-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none z-0" />
-      <div className="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none z-0" />
-      <div className="fixed top-1/3 right-10 w-[400px] h-[400px] bg-violet-600/10 rounded-full blur-[140px] pointer-events-none z-0" />
+    <div className="min-h-screen bg-[#F3FFFE] text-[#0F292B] flex overflow-x-hidden selection:bg-[#D1F2EE] selection:text-[#0D9488]">
+      {/* Breezy Coastal Ambient Atmosphere */}
+      <div className="fixed top-0 left-1/4 w-[650px] h-[650px] bg-gradient-to-br from-[#D1F2EE]/80 via-[#B7E6DF]/30 to-transparent rounded-full blur-[130px] pointer-events-none z-0" />
+      <div className="fixed bottom-0 right-1/4 w-[550px] h-[550px] bg-gradient-to-tl from-[#E6F2FF]/90 via-[#D1F2EE]/40 to-transparent rounded-full blur-[130px] pointer-events-none z-0" />
+      <div className="fixed top-1/3 right-10 w-[450px] h-[450px] bg-gradient-to-bl from-[#F9EAF0]/70 via-[#E6F2FF]/30 to-transparent rounded-full blur-[130px] pointer-events-none z-0" />
 
       {/* Sidebar */}
       <Sidebar
@@ -162,7 +163,7 @@ export const AppLayout: React.FC = () => {
       />
 
       {/* Main Workspace */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-72 z-10">
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-72">
         {/* Top Floating Nav */}
         <TopBar
           activeTab={activeTab}
@@ -172,7 +173,7 @@ export const AppLayout: React.FC = () => {
           onToggleMobileMenu={() => setIsMobileSidebarOpen(true)}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          onGroupsUpdated={loadInitialData}
+          {...(loadInitialData ? { onGroupsUpdated: loadInitialData } : {})}
         />
 
         {/* Dynamic Page Content */}
@@ -182,10 +183,10 @@ export const AppLayout: React.FC = () => {
             <LiveAudioRoom
               meetingId={activeLiveRoom.meetingId}
               roomName={activeLiveRoom.roomName}
-              groupId={selectedGroup?.id}
-              livekitUrl={activeLiveRoom.livekitUrl}
-              token={activeLiveRoom.token}
-              title={activeLiveRoom.title}
+              groupId={selectedGroup?.id ?? null}
+              {...(activeLiveRoom.livekitUrl ? { livekitUrl: activeLiveRoom.livekitUrl } : {})}
+              {...(activeLiveRoom.token ? { token: activeLiveRoom.token } : {})}
+              {...(activeLiveRoom.title ? { title: activeLiveRoom.title } : {})}
               onLeave={() => {
                 setActiveLiveRoom(null);
                 loadInitialData();
@@ -199,7 +200,7 @@ export const AppLayout: React.FC = () => {
                   <HeroSection
                     onOpenNewMeeting={() => setIsNewMeetingModalOpen(true)}
                     onViewCommitments={() => setActiveTab("commitments")}
-                    groupName={selectedGroup?.name}
+                    groupName={selectedGroup?.name ?? ""}
                     totalCommitments={commitments.length}
                   />
 
@@ -248,113 +249,115 @@ export const AppLayout: React.FC = () => {
 
               {activeTab === "settings" && (
                 <div className="space-y-6 animate-in fade-in duration-200">
-                  <div className="p-6 sm:p-8 rounded-3xl border border-white/10 bg-slate-900/70 backdrop-blur-2xl">
+                  <div className="p-6 sm:p-8 rounded-3xl border border-[#B7E6DF] bg-white/90 backdrop-blur-xl shadow-sm">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="w-2 h-2 rounded-full bg-cyan-400" />
-                      <h2 className="text-xl font-bold tracking-tight text-white">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#0D9488] animate-pulse" />
+                      <h2 className="text-xl font-bold tracking-tight text-[#0F292B]">
                         Backend Architecture &amp; Workspace Telemetry
                       </h2>
                     </div>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-[#115E59]">
                       Live connection configuration to the VocalLabs FastAPI server and LiveKit WebRTC subsystems.
                     </p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* FastAPI Backend */}
-                    <div className="p-6 rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur-xl space-y-3">
+                    <div className="p-6 rounded-3xl border border-[#B7E6DF] bg-white/90 backdrop-blur-xl space-y-3 shadow-sm hover:border-[#0D9488] transition-all">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-cyan-400">
+                        <div className="w-11 h-11 rounded-2xl bg-[#D1F2EE] border border-[#B7E6DF] flex items-center justify-center text-[#0D9488]">
                           <Server className="w-5 h-5" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-white">FastAPI Core Server</h4>
-                          <p className="text-xs text-slate-400 font-mono break-all">{BACKEND_URL}</p>
+                          <h4 className="text-sm font-bold text-[#0F292B]">FastAPI Core Server</h4>
+                          <p className="text-xs text-slate-500 font-mono break-all">{BACKEND_URL}</p>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs text-slate-400">
+                      <div className="flex items-center justify-between pt-3 border-t border-[#D1F2EE] text-xs text-slate-500">
                         <span>Status</span>
-                        <span className="text-emerald-400 font-bold font-mono">
-                          ● {health?.status || "Online"}
+                        <span className="text-[#0D9488] font-bold font-mono flex items-center gap-1.5 bg-[#D1F2EE]/70 px-2 py-0.5 rounded-full">
+                          <span className="w-2 h-2 rounded-full bg-[#0D9488]" />
+                          {health?.status || "Online"}
                         </span>
                       </div>
                     </div>
 
                     {/* LiveKit Cloud WebRTC */}
-                    <div className="p-6 rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur-xl space-y-3">
+                    <div className="p-6 rounded-3xl border border-[#B7E6DF] bg-white/90 backdrop-blur-xl space-y-3 shadow-sm hover:border-[#0891B2] transition-all">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                        <div className="w-11 h-11 rounded-2xl bg-[#E6F2FF] border border-[#B7E6DF] flex items-center justify-center text-[#0284C7]">
                           <Cloud className="w-5 h-5" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-white">LiveKit Cloud WebRTC</h4>
-                          <p className="text-xs text-slate-400 font-mono text-[11px] truncate">
+                          <h4 className="text-sm font-bold text-[#0F292B]">LiveKit Cloud WebRTC</h4>
+                          <p className="text-xs text-slate-500 font-mono text-[11px] truncate">
                             wss://vocallabsai-qun1rvmf.livekit.cloud
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs text-slate-400">
+                      <div className="flex items-center justify-between pt-3 border-t border-[#D1F2EE] text-xs text-slate-500">
                         <span>Audio Stream Mode</span>
-                        <span className="text-cyan-300 font-mono text-[11px]">
+                        <span className="text-[#0369A1] font-medium font-mono text-[11px] bg-[#E6F2FF] px-2 py-0.5 rounded-full border border-[#B7E6DF]/60">
                           Audio Only • 2s Silence STT
                         </span>
                       </div>
                     </div>
 
                     {/* Whisper Speech-to-Text */}
-                    <div className="p-6 rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur-xl space-y-3">
+                    <div className="p-6 rounded-3xl border border-[#B7E6DF] bg-white/90 backdrop-blur-xl space-y-3 shadow-sm hover:border-[#0D9488] transition-all">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                        <div className="w-11 h-11 rounded-2xl bg-[#D1F2EE] border border-[#B7E6DF] flex items-center justify-center text-[#0D9488]">
                           <Radio className="w-5 h-5" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-white">Whisper Speech-to-Text</h4>
-                          <p className="text-xs text-slate-400 font-mono">
+                          <h4 className="text-sm font-bold text-[#0F292B]">Whisper Speech-to-Text</h4>
+                          <p className="text-xs text-slate-500 font-mono">
                             {health?.whisper_stt?.url || "Remote Whisper STT API"}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs text-slate-400">
+                      <div className="flex items-center justify-between pt-3 border-t border-[#D1F2EE] text-xs text-slate-500">
                         <span>Provider</span>
-                        <span className="text-indigo-300 font-mono">
+                        <span className="text-[#0F766E] font-mono font-medium">
                           {health?.whisper_stt?.provider || "remote_whisper_api"}
                         </span>
                       </div>
                     </div>
 
                     {/* Database Telemetry */}
-                    <div className="p-6 rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur-xl space-y-3">
+                    <div className="p-6 rounded-3xl border border-[#B7E6DF] bg-white/90 backdrop-blur-xl space-y-3 shadow-sm hover:border-[#0D9488] transition-all">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                        <div className="w-11 h-11 rounded-2xl bg-[#E6F2FF] border border-[#B7E6DF] flex items-center justify-center text-[#0D9488]">
                           <Database className="w-5 h-5" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-white">Database &amp; R2 Storage</h4>
-                          <p className="text-xs text-slate-400">PostgreSQL transcripts &amp; Cloudflare R2 audio blobs</p>
+                          <h4 className="text-sm font-bold text-[#0F292B]">Database &amp; R2 Storage</h4>
+                          <p className="text-xs text-slate-500">PostgreSQL transcripts &amp; Cloudflare R2 audio blobs</p>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs text-slate-400">
+                      <div className="flex items-center justify-between pt-3 border-t border-[#D1F2EE] text-xs text-slate-500">
                         <span>Health</span>
-                        <span className="text-emerald-400 font-bold font-mono">
-                          ● {health?.database || "Healthy"}
+                        <span className="text-[#0D9488] font-bold font-mono flex items-center gap-1.5 bg-[#D1F2EE]/70 px-2 py-0.5 rounded-full">
+                          <span className="w-2 h-2 rounded-full bg-[#0D9488]" />
+                          {health?.database || "Healthy"}
                         </span>
                       </div>
                     </div>
 
                     {/* Active User Account */}
-                    <div className="p-6 rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur-xl space-y-3 md:col-span-2">
+                    <div className="p-6 rounded-3xl border border-[#B7E6DF] bg-white/90 backdrop-blur-xl space-y-3 md:col-span-2 shadow-sm">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-violet-500/15 border border-violet-500/30 flex items-center justify-center text-violet-400">
+                        <div className="w-11 h-11 rounded-2xl bg-[#F9EAF0] border border-[#B7E6DF] flex items-center justify-center text-[#9D174D]">
                           <Key className="w-5 h-5" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-white">Active User Identity</h4>
-                          <p className="text-xs text-slate-400">{currentUser?.email || "Authenticated"}</p>
+                          <h4 className="text-sm font-bold text-[#0F292B]">Active User Identity</h4>
+                          <p className="text-xs text-slate-500">{currentUser?.email || "Authenticated"}</p>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs text-slate-400">
+                      <div className="flex items-center justify-between pt-3 border-t border-[#D1F2EE] text-xs text-slate-500">
                         <span>Auth Token</span>
-                        <span className="text-slate-300 font-mono text-[10px]">
+                        <span className="text-[#115E59] font-mono text-[10px] bg-[#D1F2EE] px-2 py-0.5 rounded-md border border-[#B7E6DF]/60">
                           {authToken ? `${authToken.slice(0, 16)}...` : "Active"}
                         </span>
                       </div>

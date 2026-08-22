@@ -1,12 +1,15 @@
 /**
  * VocalLabs FastAPI Backend API Client
- * Connects directly to FastAPI backend services for Groups, Meetings, LiveKit,
- * Transcriptions STT, Commitments Extraction & Verification.
+ * Endpoints verified against live OpenAPI spec at http://192.168.137.116:8000/openapi.json
  */
 import { getAuthToken } from "./auth";
 
 export const BACKEND_URL =
   (import.meta.env["VITE_FASTAPI_BACKEND_URL"] as string) || "http://192.168.137.116:8000";
+
+// --------------------------------------------------------------------------
+// Shared Types — matched 1:1 against OpenAPI schemas
+// --------------------------------------------------------------------------
 
 export interface GroupMember {
   id: string;
@@ -17,11 +20,13 @@ export interface GroupMember {
   updated_at: string;
 }
 
+/** Matches both UserGroupItem (from /mygroups) and GroupOut (from /groups/{id}) */
 export interface Group {
   id: string;
   name: string;
   created_by?: string | null;
-  created_at: string;
+  created_at?: string | null;
+  status?: string | null;
   members?: GroupMember[];
 }
 
@@ -36,6 +41,7 @@ export interface Invitation {
   status: string;
 }
 
+/** Matches GroupMeetingOut in OpenAPI spec */
 export interface MeetingItem {
   id: string;
   group_id?: string | null;
@@ -49,6 +55,7 @@ export interface MeetingItem {
   created_at: string;
 }
 
+/** Matches GroupMeetingsCategorizedResponse in OpenAPI spec */
 export interface CategorizedMeetings {
   group_id: string;
   group_name: string;
@@ -56,6 +63,7 @@ export interface CategorizedMeetings {
   past_meetings: MeetingItem[];
 }
 
+/** Matches StartGroupMeetingResponse in OpenAPI spec */
 export interface StartMeetingResponse {
   meeting_id: string;
   group_id: string;
@@ -66,6 +74,7 @@ export interface StartMeetingResponse {
   livekit_url: string;
 }
 
+/** Matches TokenResponse (GET /api/v1/livekit/token) in OpenAPI spec */
 export interface LiveKitTokenResponse {
   meeting_id: string;
   token: string;
@@ -74,30 +83,42 @@ export interface LiveKitTokenResponse {
   identity: string;
 }
 
+/**
+ * Matches CommitmentWithMeetingOut in OpenAPI spec.
+ * NOTE: The API uses owner_id (UUID) not owner/assignee strings,
+ *       and extraction_confidence not confidence.
+ */
 export interface ApiCommitment {
   id: string;
   meeting_id: string;
   title: string;
   description?: string | null;
   status: string; // "pending" | "in_progress" | "completed" | "at_risk" | "needs_review"
+  owner_id?: string | null;
+  /** Alias for display — same as owner_id */
   owner?: string | null;
   assignee?: string | null;
   deadline?: string | null;
+  extraction_confidence?: number | null;
+  /** Alias — same as extraction_confidence */
   confidence?: number | null;
   verification_confidence?: number | null;
   completed_at?: string | null;
   created_at: string;
   updated_at: string;
-  meeting?: {
-    id: string;
-    title: string;
-    source: string;
-    status: string;
-    group_id?: string | null;
-    created_by?: string | null;
-    started_at?: string | null;
-    created_at: string;
-  } | null;
+  meeting?: MeetingSimpleOut | null;
+}
+
+/** Matches MeetingSimpleOut nested in CommitmentWithMeetingOut */
+export interface MeetingSimpleOut {
+  id: string;
+  title: string;
+  source: string;
+  status: string;
+  group_id?: string | null;
+  created_by?: string | null;
+  started_at?: string | null;
+  created_at: string;
 }
 
 export interface TranscriptItem {
@@ -119,11 +140,14 @@ export interface HealthResponse {
   };
 }
 
+// --------------------------------------------------------------------------
+// Core fetch wrapper with automatic auth token injection
+// --------------------------------------------------------------------------
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = getAuthToken();
   const headers: Record<string, string> = {
     Accept: "application/json",
-    ...(options.headers as Record<string, string> || {}),
+    ...((options.headers as Record<string, string>) || {}),
   };
 
   if (token) {
@@ -141,14 +165,23 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     let errorDetail = `Request failed (HTTP ${response.status})`;
     try {
       const errJson = await response.json();
-      errorDetail = errJson.detail || errJson.message || JSON.stringify(errJson);
-      if (Array.isArray(errorDetail)) {
-        errorDetail = errorDetail.map((e: any) => e.msg || e.detail).join(", ");
+      if (Array.isArray(errJson.detail)) {
+        // FastAPI validation errors are arrays of {loc, msg, type}
+        errorDetail = errJson.detail.map((e: any) => e.msg || e.detail || JSON.stringify(e)).join("; ");
+      } else {
+        errorDetail = errJson.detail || errJson.message || JSON.stringify(errJson);
       }
     } catch {
-      // fallback
+      // fallback to status text
+      errorDetail = `${errorDetail} — ${response.statusText}`;
     }
     throw new Error(errorDetail);
+  }
+
+  // Handle empty 204 responses
+  const contentType = response.headers.get("content-type");
+  if (!contentType || !contentType.includes("application/json")) {
+    return {} as T;
   }
 
   return response.json() as Promise<T>;
@@ -162,14 +195,32 @@ export async function getBackendHealth(): Promise<HealthResponse> {
 }
 
 // --------------------------------------------------------------------------
+// Auth
+// --------------------------------------------------------------------------
+export async function authenticateUser(email: string, name: string) {
+  // POST /api/v1/auth  (no trailing slash — confirmed in spec)
+  return request<{ auth_token: string; name: string; email: string; groups: Group[] }>("/api/v1/auth", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, name }),
+  });
+}
+
+// --------------------------------------------------------------------------
 // Groups
 // --------------------------------------------------------------------------
+
+/**
+ * GET /api/v1/mygroups
+ * FIXED: was incorrectly calling /api/v1/auth/mygroups which does not exist.
+ */
 export async function getMyGroups(): Promise<Group[]> {
-  return request<Group[]>("/api/v1/auth/mygroups");
+  return request<Group[]>("/api/v1/mygroups");
 }
 
 export async function createGroup(name: string): Promise<Group> {
-  return request<Group>("/api/v1/groups/", {
+  // POST /api/v1/groups  — returns 201 with GroupOut
+  return request<Group>("/api/v1/groups", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name }),
@@ -181,6 +232,7 @@ export async function getGroupDetails(groupId: string): Promise<Group> {
 }
 
 export async function inviteToGroup(groupId: string, email: string): Promise<Invitation> {
+  // POST /api/v1/groups/{group_id}/invite  body: InvitationCreate { email: string }
   return request<Invitation>(`/api/v1/groups/${groupId}/invite`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -214,6 +266,11 @@ export async function getGroupMeetings(groupId: string): Promise<CategorizedMeet
   return request<CategorizedMeetings>(`/api/v1/groups/${groupId}/meetings`);
 }
 
+/**
+ * POST /api/v1/groups/{group_id}/meetings
+ * Body: StartGroupMeetingRequest { title?: string, room_name?: string }
+ * Returns: StartGroupMeetingResponse (201)
+ */
 export async function startGroupMeeting(
   groupId: string,
   title?: string,
@@ -224,20 +281,22 @@ export async function startGroupMeeting(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       title: title || "Live Team Meeting",
-      room_name: roomName,
+      ...(roomName ? { room_name: roomName } : {}),
     }),
   });
 }
 
+/**
+ * POST /api/v1/groups/{group_id}/meetings/{meeting_id}/end
+ * Returns: GroupMeetingOut (200)
+ */
 export async function endGroupMeeting(
   groupId: string,
   meetingId: string,
-): Promise<{ message: string; meeting_id: string; status: string }> {
-  return request<{ message: string; meeting_id: string; status: string }>(
+): Promise<MeetingItem> {
+  return request<MeetingItem>(
     `/api/v1/groups/${groupId}/meetings/${meetingId}/end`,
-    {
-      method: "POST",
-    },
+    { method: "POST" },
   );
 }
 
@@ -249,16 +308,21 @@ export async function getMeetingTranscripts(meetingId: string): Promise<Transcri
   return request<TranscriptItem[]>(`/api/v1/transcripts/meeting/${meetingId}`);
 }
 
+/**
+ * POST /api/v1/meetings/transcribe
+ * Multipart form: file (required), title (optional), model (optional), language (optional)
+ * NOTE: group_id is NOT in the spec schema for this endpoint — removed to prevent 422.
+ */
 export async function transcribeAudioFile(
   file: File,
   title?: string,
-  groupId?: string,
+  _groupId?: string, // kept for compatibility but NOT sent — not in spec
 ): Promise<any> {
   const token = getAuthToken();
   const formData = new FormData();
   formData.append("file", file);
   if (title) formData.append("title", title);
-  if (groupId) formData.append("group_id", groupId);
+  // model defaults to "small" in the spec
 
   const headers: Record<string, string> = {
     Accept: "application/json",
@@ -278,7 +342,11 @@ export async function transcribeAudioFile(
     let err = `Transcription failed (HTTP ${response.status})`;
     try {
       const j = await response.json();
-      err = j.detail || j.message || err;
+      if (Array.isArray(j.detail)) {
+        err = j.detail.map((e: any) => e.msg || JSON.stringify(e)).join("; ");
+      } else {
+        err = j.detail || j.message || err;
+      }
     } catch {}
     throw new Error(err);
   }
@@ -286,6 +354,10 @@ export async function transcribeAudioFile(
   return response.json();
 }
 
+/**
+ * POST /api/v1/livekit/token
+ * Body: TokenRequest { room_name, identity, name?, group_id? }
+ */
 export async function getLiveKitToken(
   roomName: string,
   identity: string,
@@ -299,7 +371,7 @@ export async function getLiveKitToken(
       room_name: roomName,
       identity,
       name: name || identity,
-      group_id: groupId,
+      ...(groupId ? { group_id: groupId } : {}),
     }),
   });
 }
@@ -307,18 +379,48 @@ export async function getLiveKitToken(
 // --------------------------------------------------------------------------
 // Commitments
 // --------------------------------------------------------------------------
-export async function getCommitments(): Promise<ApiCommitment[]> {
-  return request<ApiCommitment[]>("/api/v1/commitments/");
+
+/**
+ * GET /api/v1/commitments
+ * Returns CommitmentWithMeetingOut[]
+ * Optionally pass group_id query param to scope to a group.
+ */
+export async function getCommitments(groupId?: string): Promise<ApiCommitment[]> {
+  const url = groupId
+    ? `/api/v1/commitments?group_id=${groupId}`
+    : "/api/v1/commitments";
+  const raw = await request<ApiCommitment[]>(url);
+
+  // Normalize field name aliases for display components
+  return (raw || []).map((c) => ({
+    ...c,
+    owner: c.owner || c.owner_id || null,
+    confidence: c.confidence ?? c.extraction_confidence ?? null,
+  }));
 }
 
 export async function getCommitmentById(commitmentId: string): Promise<ApiCommitment> {
-  return request<ApiCommitment>(`/api/v1/commitments/${commitmentId}`);
+  const raw = await request<ApiCommitment>(`/api/v1/commitments/${commitmentId}`);
+  return {
+    ...raw,
+    owner: raw.owner || raw.owner_id || null,
+    confidence: raw.confidence ?? raw.extraction_confidence ?? null,
+  };
 }
 
 export async function getMeetingCommitments(meetingId: string): Promise<ApiCommitment[]> {
-  return request<ApiCommitment[]>(`/api/v1/commitments/meeting/${meetingId}`);
+  const raw = await request<ApiCommitment[]>(`/api/v1/commitments/meeting/${meetingId}`);
+  return (raw || []).map((c) => ({
+    ...c,
+    owner: c.owner || c.owner_id || null,
+    confidence: c.confidence ?? c.extraction_confidence ?? null,
+  }));
 }
 
+/**
+ * POST /api/v1/commitments/analyze
+ * Body: CommitmentAnalyzeRequest { meeting_id: UUID }
+ */
 export async function analyzeMeetingCommitments(meetingId: string): Promise<any> {
   return request<any>("/api/v1/commitments/analyze", {
     method: "POST",
@@ -327,6 +429,9 @@ export async function analyzeMeetingCommitments(meetingId: string): Promise<any>
   });
 }
 
+/**
+ * POST /api/v1/commitments/{commitment_id}/verify
+ */
 export async function verifyCommitment(commitmentId: string): Promise<any> {
   return request<any>(`/api/v1/commitments/${commitmentId}/verify`, {
     method: "POST",

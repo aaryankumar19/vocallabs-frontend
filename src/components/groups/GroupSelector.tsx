@@ -58,7 +58,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
       setInvitations(userInvs);
 
       if (userGroups.length > 0 && !selectedGroup) {
-        onSelectGroup(userGroups[0]);
+        onSelectGroup(userGroups[0] ?? null);
       }
     } catch (err: any) {
       console.error("Failed to load groups data:", err);
@@ -137,9 +137,9 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
         <div className="relative">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800/90 border border-white/10 text-xs font-semibold text-slate-200 transition-all shadow-sm cursor-pointer"
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white hover:bg-[#D1F2EE]/30 border border-[#B7E6DF] text-xs font-semibold text-[#0F292B] transition-all shadow-2xs hover:shadow-xs cursor-pointer"
           >
-            <div className="w-5 h-5 rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-white">
+            <div className="w-5 h-5 rounded-lg bg-[#D1F2EE] border border-[#B7E6DF] flex items-center justify-center text-[#0D9488]">
               <Building2 className="w-3 h-3" />
             </div>
             <span className="max-w-[140px] truncate">
@@ -150,14 +150,14 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
 
           {/* Dropdown Menu */}
           {isOpen && (
-            <div className="absolute left-0 mt-2 w-64 rounded-2xl border border-white/10 bg-slate-900/95 p-2 shadow-2xl backdrop-blur-2xl z-50 animate-in fade-in duration-150">
-              <div className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <div className="absolute left-0 mt-2 w-64 rounded-2xl border border-[#B7E6DF] bg-[#F3FFFE]/98 p-2 shadow-xl backdrop-blur-2xl z-50 animate-in fade-in duration-150">
+              <div className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#115E59]">
                 Your Groups
               </div>
 
               <div className="max-h-48 overflow-y-auto space-y-1 py-1">
                 {groups.length === 0 ? (
-                  <div className="px-3 py-2 text-xs text-slate-400">No groups yet. Create one!</div>
+                  <div className="px-3 py-2 text-xs text-slate-500">No groups yet. Create one!</div>
                 ) : (
                   groups.map((g) => (
                     <button
@@ -168,24 +168,24 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
                       }}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
                         selectedGroup?.id === g.id
-                          ? "bg-blue-600/20 text-cyan-300 border border-blue-500/30"
-                          : "text-slate-300 hover:bg-white/5 hover:text-white"
+                          ? "bg-[#D1F2EE] text-[#0F292B] border border-[#B7E6DF] font-semibold"
+                          : "text-[#0F292B] hover:bg-[#E6F2FF]/60 hover:text-[#0D9488]"
                       }`}
                     >
                       <span className="truncate">{g.name}</span>
-                      {selectedGroup?.id === g.id && <Check className="w-3.5 h-3.5 text-cyan-400" />}
+                      {selectedGroup?.id === g.id && <Check className="w-3.5 h-3.5 text-[#0D9488]" />}
                     </button>
                   ))
                 )}
               </div>
 
-              <div className="pt-2 mt-1 border-t border-white/5 space-y-1">
+              <div className="pt-2 mt-1 border-t border-[#D1F2EE] space-y-1">
                 <button
                   onClick={() => {
                     setIsOpen(false);
                     setShowCreateModal(true);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs text-cyan-400 hover:bg-cyan-500/10 font-medium cursor-pointer transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs text-[#0D9488] hover:bg-[#D1F2EE] font-semibold cursor-pointer transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Create New Group</span>
@@ -197,9 +197,9 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
                       setIsOpen(false);
                       setShowInviteModal(true);
                     }}
-                    className="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs text-slate-300 hover:bg-white/5 font-medium cursor-pointer transition-colors"
+                    className="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs text-[#115E59] hover:bg-[#E6F2FF] font-medium cursor-pointer transition-colors"
                   >
-                    <UserPlus className="w-3.5 h-3.5 text-blue-400" />
+                    <UserPlus className="w-3.5 h-3.5 text-[#0284C7]" />
                     <span>Invite Team Member</span>
                   </button>
                 )}
@@ -212,9 +212,9 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
         {invitations.length > 0 && (
           <button
             onClick={() => setShowInvitationsModal(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold hover:bg-amber-500/25 transition-all cursor-pointer animate-pulse"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#F9EAF0] border border-[#B7E6DF] text-[#9D174D] text-xs font-semibold hover:bg-[#F9EAF0]/80 transition-all cursor-pointer"
           >
-            <Mail className="w-3.5 h-3.5" />
+            <Mail className="w-3.5 h-3.5 text-[#BE185D]" />
             <span>{invitations.length} Invites</span>
           </button>
         )}
@@ -222,28 +222,28 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
 
       {/* Create Group Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-slate-900 p-6 shadow-2xl backdrop-blur-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0F292B]/40 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-md rounded-3xl border border-[#B7E6DF] bg-[#F3FFFE] p-6 sm:p-7 shadow-2xl backdrop-blur-2xl">
             <button
               onClick={() => setShowCreateModal(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg"
+              className="absolute top-5 right-5 text-slate-400 hover:text-[#0F292B] p-1 rounded-lg hover:bg-[#D1F2EE]"
             >
               <X className="w-4 h-4" />
             </button>
 
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-cyan-400">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl bg-[#D1F2EE] border border-[#B7E6DF] flex items-center justify-center text-[#0D9488]">
                 <Building2 className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white">Create New Group</h3>
-                <p className="text-xs text-slate-400">Collaborate with your team on meetings and follow-throughs</p>
+                <h3 className="text-base font-bold text-[#0F292B]">Create New Group</h3>
+                <p className="text-xs text-[#115E59]">Collaborate with your team on meetings and follow-throughs</p>
               </div>
             </div>
 
             <form onSubmit={handleCreateGroup} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#115E59] mb-1.5">
                   Group Name
                 </label>
                 <input
@@ -252,7 +252,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
                   placeholder="e.g. Core Engineering, Product Pod"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#B7E6DF] text-sm text-[#0F292B] placeholder-slate-400 focus:bg-white focus:outline-none focus:border-[#0D9488] focus:ring-2 focus:ring-[#D1F2EE]"
                 />
               </div>
 
@@ -260,14 +260,14 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white"
+                  className="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-[#0F292B]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-600/20 disabled:opacity-50 cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-[#0D9488] hover:bg-[#0F766E] shadow-sm shadow-[#0D9488]/20 disabled:opacity-50 cursor-pointer"
                 >
                   {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                   Create Group
@@ -280,28 +280,28 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
 
       {/* Invite Member Modal */}
       {showInviteModal && selectedGroup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-slate-900 p-6 shadow-2xl backdrop-blur-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0F292B]/40 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-md rounded-3xl border border-[#B7E6DF] bg-[#F3FFFE] p-6 sm:p-7 shadow-2xl backdrop-blur-2xl">
             <button
               onClick={() => setShowInviteModal(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg"
+              className="absolute top-5 right-5 text-slate-400 hover:text-[#0F292B] p-1 rounded-lg hover:bg-[#D1F2EE]"
             >
               <X className="w-4 h-4" />
             </button>
 
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl bg-[#E6F2FF] border border-[#B7E6DF] flex items-center justify-center text-[#0284C7]">
                 <UserPlus className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white">Invite to {selectedGroup.name}</h3>
-                <p className="text-xs text-slate-400">Send an invitation email to add a teammate</p>
+                <h3 className="text-base font-bold text-[#0F292B]">Invite to {selectedGroup.name}</h3>
+                <p className="text-xs text-[#115E59]">Send an invitation email to add a teammate</p>
               </div>
             </div>
 
             <form onSubmit={handleInviteMember} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#115E59] mb-1.5">
                   Email Address
                 </label>
                 <input
@@ -310,7 +310,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="colleague@company.com"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#B7E6DF] text-sm text-[#0F292B] placeholder-slate-400 focus:bg-white focus:outline-none focus:border-[#0D9488] focus:ring-2 focus:ring-[#D1F2EE]"
                 />
               </div>
 
@@ -318,14 +318,14 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowInviteModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white"
+                  className="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-[#0F292B]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-md shadow-blue-600/20 disabled:opacity-50 cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-[#0D9488] to-[#0284C7] hover:from-[#0F766E] hover:to-[#0369A1] shadow-sm shadow-[#0D9488]/20 disabled:opacity-50 cursor-pointer"
                 >
                   {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Mail className="w-3.5 h-3.5" />}
                   Send Invitation
@@ -338,37 +338,37 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
 
       {/* Invitations List Modal */}
       {showInvitationsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-slate-900 p-6 shadow-2xl backdrop-blur-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0F292B]/40 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-md rounded-3xl border border-[#B7E6DF] bg-[#F3FFFE] p-6 sm:p-7 shadow-2xl backdrop-blur-2xl">
             <button
               onClick={() => setShowInvitationsModal(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg"
+              className="absolute top-5 right-5 text-slate-400 hover:text-[#0F292B] p-1 rounded-lg hover:bg-[#D1F2EE]"
             >
               <X className="w-4 h-4" />
             </button>
 
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl bg-[#F9EAF0] border border-[#B7E6DF] flex items-center justify-center text-[#BE185D]">
                 <Mail className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white">Pending Invitations</h3>
-                <p className="text-xs text-slate-400">Groups you have been invited to join</p>
+                <h3 className="text-base font-bold text-[#0F292B]">Pending Invitations</h3>
+                <p className="text-xs text-[#115E59]">Groups you have been invited to join</p>
               </div>
             </div>
 
             <div className="space-y-3 max-h-72 overflow-y-auto py-2">
               {invitations.length === 0 ? (
-                <div className="text-center py-6 text-xs text-slate-400">No pending invitations.</div>
+                <div className="text-center py-6 text-xs text-slate-500">No pending invitations.</div>
               ) : (
                 invitations.map((inv) => (
                   <div
                     key={inv.id}
-                    className="p-3.5 rounded-2xl bg-slate-950/70 border border-white/10 flex items-center justify-between gap-3"
+                    className="p-3.5 rounded-2xl bg-white border border-[#B7E6DF] flex items-center justify-between gap-3"
                   >
                     <div>
-                      <span className="block text-xs font-bold text-white">{inv.group_name || "Team Workspace"}</span>
-                      <span className="block text-[11px] text-slate-400">
+                      <span className="block text-xs font-bold text-[#0F292B]">{inv.group_name || "Team Workspace"}</span>
+                      <span className="block text-[11px] text-[#115E59]">
                         Invited by {inv.inviter_name || "Team Lead"}
                       </span>
                     </div>
@@ -376,13 +376,13 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleAcceptInvite(inv)}
-                        className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-[#0D9488] hover:bg-[#0F766E] text-white text-xs font-semibold transition-colors cursor-pointer"
                       >
                         Accept
                       </button>
                       <button
                         onClick={() => handleRejectInvite(inv)}
-                        className="px-2.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 text-xs font-medium transition-colors cursor-pointer"
+                        className="px-2.5 py-1.5 rounded-xl bg-[#F9EAF0] hover:bg-[#F9EAF0]/80 text-[#9D174D] border border-[#B7E6DF] text-xs font-medium transition-colors cursor-pointer"
                       >
                         Decline
                       </button>

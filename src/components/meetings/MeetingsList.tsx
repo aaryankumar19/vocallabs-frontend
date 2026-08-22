@@ -8,7 +8,6 @@ import {
   Sparkles,
   StopCircle,
   Radio,
-  FileText,
   Loader2,
   ChevronRight,
   Headphones,
@@ -96,22 +95,22 @@ export const MeetingsList: React.FC<MeetingsListProps> = ({
   return (
     <div className="space-y-6">
       {/* Meetings Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl border border-white/10 bg-slate-900/70 backdrop-blur-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl border border-[#B7E6DF] bg-white/90 shadow-sm">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 rounded-full bg-cyan-400" />
-            <h2 className="text-xl font-bold tracking-tight text-white">
+            <span className="w-2 h-2 rounded-full bg-[#0D9488]" />
+            <h2 className="text-xl font-bold tracking-tight text-[#0F292B]">
               {selectedGroup ? `${selectedGroup.name} Meetings` : "Meetings Workspace"}
             </h2>
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-[#115E59]">
             Real-time LiveKit audio rooms, speech-to-text transcriptions, and commitment extraction.
           </p>
         </div>
 
         <button
           onClick={onOpenNewMeeting}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-lg shadow-blue-600/20 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-[#0D9488] via-[#0891B2] to-[#0284C7] hover:from-[#0F766E] hover:to-[#0369A1] shadow-sm shadow-[#0D9488]/20 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 cursor-pointer self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>+ New Meeting</span>
@@ -120,16 +119,16 @@ export const MeetingsList: React.FC<MeetingsListProps> = ({
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-16 text-slate-400 space-y-3">
-          <Loader2 className="w-7 h-7 animate-spin text-cyan-400" />
-          <span className="text-xs font-medium">Loading group meetings...</span>
+          <Loader2 className="w-7 h-7 animate-spin text-[#0D9488]" />
+          <span className="text-xs font-medium text-[#115E59]">Loading group meetings...</span>
         </div>
       ) : (
         <div className="space-y-8">
           {/* Ongoing Live Meetings Section */}
           {ongoingMeetings.length > 0 && (
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-rose-400">
-                <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#9D174D]">
+                <span className="w-2 h-2 rounded-full bg-[#BE185D] animate-ping" />
                 <span>Live Ongoing Meetings ({ongoingMeetings.length})</span>
               </div>
 
@@ -138,29 +137,29 @@ export const MeetingsList: React.FC<MeetingsListProps> = ({
                   <div
                     key={m.id}
                     onClick={() => setSelectedMeeting(m)}
-                    className="relative overflow-hidden rounded-3xl border border-rose-500/30 bg-rose-950/20 p-6 backdrop-blur-xl transition-all duration-300 hover:border-rose-500/50 hover:shadow-2xl hover:shadow-rose-500/10 cursor-pointer flex flex-col justify-between"
+                    className="relative overflow-hidden rounded-3xl border border-[#B7E6DF] bg-[#F9EAF0]/60 p-6 transition-all duration-300 hover:border-[#BE185D] hover:shadow-md cursor-pointer flex flex-col justify-between"
                   >
                     <div>
                       <div className="flex items-center justify-between text-xs mb-3">
-                        <div className="flex items-center gap-2 text-rose-300 font-semibold">
-                          <Radio className="w-4 h-4 animate-pulse text-rose-400" />
+                        <div className="flex items-center gap-2 text-[#9D174D] font-semibold">
+                          <Radio className="w-4 h-4 animate-pulse text-[#BE185D]" />
                           <span>Live Session Active</span>
                         </div>
-                        <span className="text-[11px] font-mono text-slate-400">
+                        <span className="text-[11px] font-mono text-slate-500">
                           {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
 
-                      <h3 className="text-base font-bold text-white mb-2">{m.title}</h3>
-                      <p className="text-xs text-slate-400 mb-4">
+                      <h3 className="text-base font-bold text-[#0F292B] mb-2">{m.title}</h3>
+                      <p className="text-xs text-[#115E59] mb-4">
                         Source: {m.source} • Meeting ID: {m.id.slice(0, 8)}...
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-white/5 text-xs gap-2">
+                    <div className="flex items-center justify-between pt-4 border-t border-[#B7E6DF]/60 text-xs gap-2">
                       <button
                         onClick={(e) => handleJoinLive(e, m)}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-all cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#0D9488] hover:bg-[#0F766E] text-white font-semibold text-xs shadow-xs transition-all cursor-pointer"
                       >
                         <Headphones className="w-3.5 h-3.5" />
                         Join Audio Room
@@ -169,7 +168,7 @@ export const MeetingsList: React.FC<MeetingsListProps> = ({
                       <button
                         onClick={(e) => handleEndMeeting(e, m.id)}
                         disabled={endingId === m.id}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs shadow-md shadow-rose-600/20 transition-all cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs shadow-xs transition-all cursor-pointer"
                       >
                         {endingId === m.id ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -187,21 +186,21 @@ export const MeetingsList: React.FC<MeetingsListProps> = ({
 
           {/* Past Meetings Section */}
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#115E59]">
               <Clock className="w-4 h-4" />
-              <span>Past Meetings & Transcriptions ({pastMeetings.length})</span>
+              <span>Past Meetings &amp; Commitments ({pastMeetings.length})</span>
             </div>
 
             {pastMeetings.length === 0 && ongoingMeetings.length === 0 ? (
-              <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-slate-900/40">
-                <Video className="w-10 h-10 text-slate-500 mx-auto mb-3" />
-                <h4 className="text-sm font-bold text-slate-200">No meetings recorded yet</h4>
-                <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                  Upload an audio recording or start a live room to automatically generate transcripts and commitments.
+              <div className="p-12 text-center rounded-3xl border border-dashed border-[#B7E6DF] bg-white">
+                <Video className="w-10 h-10 text-[#0D9488]/60 mx-auto mb-3" />
+                <h4 className="text-sm font-bold text-[#0F292B]">No meetings recorded yet</h4>
+                <p className="text-xs text-[#115E59] mt-1 max-w-sm mx-auto">
+                  Upload an audio recording or start a live room to automatically extract commitments.
                 </p>
                 <button
                   onClick={onOpenNewMeeting}
-                  className="mt-4 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 cursor-pointer inline-flex items-center gap-2"
+                  className="mt-4 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-[#0D9488] hover:bg-[#0F766E] cursor-pointer inline-flex items-center gap-2 shadow-xs"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Process First Meeting
@@ -213,15 +212,15 @@ export const MeetingsList: React.FC<MeetingsListProps> = ({
                   <div
                     key={m.id}
                     onClick={() => setSelectedMeeting(m)}
-                    className="group relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 p-6 backdrop-blur-xl transition-all duration-300 hover:border-blue-500/40 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/10 cursor-pointer flex flex-col justify-between"
+                    className="group relative overflow-hidden rounded-3xl border border-[#B7E6DF] bg-white p-6 transition-all duration-300 hover:border-[#0D9488] hover:-translate-y-0.5 hover:shadow-md cursor-pointer flex flex-col justify-between shadow-xs"
                   >
                     <div>
-                      <div className="flex items-center justify-between text-xs text-slate-400 mb-3">
+                      <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
                         <div className="flex items-center gap-2">
-                          <span className="p-1.5 rounded-lg bg-blue-500/15 text-blue-400 border border-blue-500/20">
+                          <span className="p-1.5 rounded-lg bg-[#D1F2EE] text-[#0D9488] border border-[#B7E6DF]">
                             <Video className="w-3.5 h-3.5" />
                           </span>
-                          <span className="font-semibold text-slate-300">
+                          <span className="font-semibold text-[#0F292B]">
                             {new Date(m.created_at).toLocaleDateString(undefined, {
                               month: "short",
                               day: "numeric",
@@ -230,25 +229,25 @@ export const MeetingsList: React.FC<MeetingsListProps> = ({
                             })}
                           </span>
                         </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-800 text-slate-300">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#E6F2FF] text-[#0369A1] border border-[#B7E6DF]/60">
                           {m.status}
                         </span>
                       </div>
 
-                      <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors mb-2">
+                      <h3 className="text-base font-bold text-[#0F292B] group-hover:text-[#0D9488] transition-colors mb-2">
                         {m.title}
                       </h3>
-                      <p className="text-xs text-slate-400 mb-4">
+                      <p className="text-xs text-[#115E59] mb-4">
                         Source: {m.source} • ID: {m.id.slice(0, 8)}...
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-white/5 text-xs text-slate-400">
-                      <span className="flex items-center gap-1 text-cyan-400 font-medium">
-                        <FileText className="w-3.5 h-3.5" />
-                        View Transcripts & Commitments
+                    <div className="flex items-center justify-between pt-4 border-t border-[#D1F2EE] text-xs text-slate-500">
+                      <span className="flex items-center gap-1.5 text-[#0D9488] font-semibold">
+                        <CheckSquare className="w-3.5 h-3.5" />
+                        View Commitments &amp; AI Analysis
                       </span>
-                      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:translate-x-1 transition-transform" />
+                      <ChevronRight className="w-4 h-4 text-[#0D9488] group-hover:translate-x-1 transition-transform" />
                     </div>
                   </div>
                 ))}
@@ -258,7 +257,7 @@ export const MeetingsList: React.FC<MeetingsListProps> = ({
         </div>
       )}
 
-      {/* Meeting Detail Modal for Transcripts & Commitments */}
+      {/* Meeting Detail Modal for Commitments */}
       <MeetingDetailModal
         meeting={selectedMeeting}
         onClose={() => setSelectedMeeting(null)}

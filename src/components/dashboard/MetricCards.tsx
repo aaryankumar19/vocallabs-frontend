@@ -42,22 +42,24 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
       value: activeCount,
       subtext: `${total} total tracked`,
       icon: Layers,
-      color: "blue",
-      glow: "rgba(59, 130, 246, 0.15)",
-      borderColor: "border-blue-500/20 hover:border-blue-500/40",
-      badgeBg: "bg-blue-500/15 text-blue-300 border-blue-500/30",
+      iconColor: "text-[#0D9488]",
+      iconBg: "bg-[#D1F2EE] border-[#B7E6DF]",
+      cardBg: "bg-white/90 hover:bg-[#D1F2EE]/20",
+      borderColor: "border-[#B7E6DF] hover:border-[#0D9488]",
+      badgeBg: "bg-[#D1F2EE] text-[#0F766E] border-[#B7E6DF]",
       trendIcon: TrendingUp,
     },
     {
       id: "completed",
       title: "COMPLETED",
       value: completedCount,
-      subtext: `${completionRate}% completion rate`,
+      subtext: `${completionRate}% rate`,
       icon: CheckCircle2,
-      color: "emerald",
-      glow: "rgba(34, 197, 94, 0.15)",
-      borderColor: "border-emerald-500/20 hover:border-emerald-500/40",
-      badgeBg: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+      iconColor: "text-[#0F766E]",
+      iconBg: "bg-[#B7E6DF]/50 border-[#B7E6DF]",
+      cardBg: "bg-white/90 hover:bg-[#B7E6DF]/20",
+      borderColor: "border-[#B7E6DF] hover:border-[#0F766E]",
+      badgeBg: "bg-[#B7E6DF] text-[#115E59] border-[#B7E6DF]",
       trendIcon: TrendingUp,
     },
     {
@@ -66,10 +68,11 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
       value: activeCount,
       subtext: "Tracking verification",
       icon: Clock,
-      color: "amber",
-      glow: "rgba(245, 158, 11, 0.15)",
-      borderColor: "border-amber-500/20 hover:border-amber-500/40",
-      badgeBg: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+      iconColor: "text-[#0284C7]",
+      iconBg: "bg-[#E6F2FF] border-[#B7E6DF]",
+      cardBg: "bg-white/90 hover:bg-[#E6F2FF]/30",
+      borderColor: "border-[#B7E6DF] hover:border-[#0284C7]",
+      badgeBg: "bg-[#E6F2FF] text-[#0369A1] border-[#B7E6DF]",
       trendIcon: null,
     },
     {
@@ -78,10 +81,11 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
       value: atRiskCount,
       subtext: atRiskCount > 0 ? "Requires review" : "All on track",
       icon: ShieldAlert,
-      color: "rose",
-      glow: "rgba(239, 68, 68, 0.15)",
-      borderColor: "border-rose-500/20 hover:border-rose-500/40",
-      badgeBg: "bg-rose-500/15 text-rose-300 border-rose-500/30",
+      iconColor: "text-[#BE185D]",
+      iconBg: "bg-[#F9EAF0] border-[#B7E6DF]",
+      cardBg: "bg-white/90 hover:bg-[#F9EAF0]/30",
+      borderColor: "border-[#B7E6DF] hover:border-[#BE185D]",
+      badgeBg: "bg-[#F9EAF0] text-[#9D174D] border-[#B7E6DF]",
       trendIcon: null,
     },
   ];
@@ -96,34 +100,28 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
           <div
             key={card.id}
             onClick={() => onFilterSelect && onFilterSelect(card.id)}
-            className={`group relative overflow-hidden rounded-2xl border ${card.borderColor} bg-slate-900/60 p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer`}
+            className={`group relative overflow-hidden rounded-2xl border ${card.borderColor} ${card.cardBg} p-5 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer`}
           >
-            {/* Ambient card glow */}
-            <div
-              className="absolute -top-12 -right-12 w-28 h-28 rounded-full blur-2xl pointer-events-none opacity-40 group-hover:opacity-80 transition-opacity"
-              style={{ backgroundColor: card.glow }}
-            />
-
             <div className="relative z-10 flex items-center justify-between mb-3">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#115E59]">
                 {card.title}
               </span>
               <div
-                className="p-2 rounded-xl bg-slate-950/80 border border-white/5 shadow-inner transition-transform group-hover:scale-110"
+                className={`p-2 rounded-xl ${card.iconBg} border shadow-2xs transition-transform group-hover:scale-105`}
               >
-                <Icon className="w-4 h-4 text-slate-200" />
+                <Icon className={`w-4 h-4 ${card.iconColor}`} />
               </div>
             </div>
 
             <div className="relative z-10 flex items-baseline justify-between">
               <div>
-                <span className="text-3xl font-extrabold font-mono tracking-tight text-white">
+                <span className="text-3xl font-extrabold font-mono tracking-tight text-[#0F292B]">
                   {card.value}
                 </span>
               </div>
 
               <div
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium border ${card.badgeBg}`}
+                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${card.badgeBg}`}
               >
                 {TrendIcon && <TrendIcon className="w-3 h-3" />}
                 <span>{card.subtext}</span>

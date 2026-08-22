@@ -30,18 +30,18 @@ export const CommitmentsTable: React.FC<CommitmentsTableProps> = ({
   const getStatusBadge = (status: string) => {
     const s = (status || "").toLowerCase();
     if (s.includes("complete") || s === "done") {
-      return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
+      return "bg-[#D1F2EE] text-[#0F766E] border-[#B7E6DF]";
     }
     if (s.includes("progress") || s === "ongoing") {
-      return "bg-blue-500/15 text-blue-400 border-blue-500/30";
+      return "bg-[#E6F2FF] text-[#0369A1] border-[#B7E6DF]";
     }
     if (s.includes("risk") || s === "blocked") {
-      return "bg-rose-500/15 text-rose-400 border-rose-500/30";
+      return "bg-[#F9EAF0] text-[#9D174D] border-[#B7E6DF]";
     }
     if (s.includes("review")) {
-      return "bg-amber-500/15 text-amber-400 border-amber-500/30";
+      return "bg-[#F9EAF0] text-[#BE185D] border-[#B7E6DF]";
     }
-    return "bg-slate-800 text-slate-300 border-white/10";
+    return "bg-[#F3FFFE] text-[#115E59] border-[#B7E6DF]";
   };
 
   const getConfidencePercentage = (comm: ApiCommitment): number => {
@@ -55,21 +55,21 @@ export const CommitmentsTable: React.FC<CommitmentsTableProps> = ({
   };
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/70 backdrop-blur-2xl shadow-xl">
+    <div className="relative overflow-hidden rounded-3xl border border-[#B7E6DF] bg-white/95 shadow-sm">
       {/* Table Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 border-b border-white/5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 border-b border-[#D1F2EE]">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 rounded-full bg-cyan-400" />
-            <h3 className="text-base font-bold tracking-tight text-white">{title}</h3>
+            <span className="w-2 h-2 rounded-full bg-[#0D9488]" />
+            <h3 className="text-base font-bold tracking-tight text-[#0F292B]">{title}</h3>
           </div>
-          <p className="text-xs text-slate-400">{subtitle}</p>
+          <p className="text-xs text-[#115E59]">{subtitle}</p>
         </div>
 
         {showAllLink && onViewAll && (
           <button
             onClick={onViewAll}
-            className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 self-start sm:self-auto cursor-pointer"
+            className="text-xs font-semibold text-[#0D9488] hover:text-[#0F766E] flex items-center gap-1 self-start sm:self-auto cursor-pointer"
           >
             <span>View All ({commitments.length})</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -78,7 +78,7 @@ export const CommitmentsTable: React.FC<CommitmentsTableProps> = ({
       </div>
 
       {commitments.length === 0 ? (
-        <div className="p-12 text-center text-xs text-slate-400">
+        <div className="p-12 text-center text-xs text-slate-500">
           No commitments found. Transcribe a meeting or start a live room to extract commitments.
         </div>
       ) : (
@@ -87,7 +87,7 @@ export const CommitmentsTable: React.FC<CommitmentsTableProps> = ({
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/5 bg-slate-950/40 text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                <tr className="border-b border-[#D1F2EE] bg-[#F3FFFE] text-[10px] font-mono uppercase tracking-wider text-[#115E59]">
                   <th className="py-3.5 px-6">Commitment</th>
                   <th className="py-3.5 px-4">Owner / Assignee</th>
                   <th className="py-3.5 px-4">Meeting</th>
@@ -96,22 +96,22 @@ export const CommitmentsTable: React.FC<CommitmentsTableProps> = ({
                   <th className="py-3.5 px-6 text-right">Created</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 text-xs">
+              <tbody className="divide-y divide-[#D1F2EE] text-xs">
                 {commitments.map((comm) => {
                   const conf = getConfidencePercentage(comm);
                   return (
                     <tr
                       key={comm.id}
                       onClick={() => onSelectCommitment(comm)}
-                      className="group hover:bg-blue-600/10 transition-colors duration-150 cursor-pointer"
+                      className="group hover:bg-[#D1F2EE]/30 transition-colors duration-150 cursor-pointer"
                     >
                       {/* Commitment Title */}
                       <td className="py-4 px-6 max-w-xs">
-                        <div className="font-semibold text-slate-200 group-hover:text-white line-clamp-1">
+                        <div className="font-semibold text-[#0F292B] group-hover:text-[#0D9488] transition-colors line-clamp-1">
                           {comm.title}
                         </div>
                         {comm.description && (
-                          <p className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">
+                          <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
                             {comm.description}
                           </p>
                         )}
@@ -120,17 +120,17 @@ export const CommitmentsTable: React.FC<CommitmentsTableProps> = ({
                       {/* Owner */}
                       <td className="py-4 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-blue-600/30 border border-blue-500/30 flex items-center justify-center text-[10px] font-bold text-cyan-300">
-                            {(comm.owner || comm.assignee || "AI")[0].toUpperCase()}
+                          <div className="w-6 h-6 rounded-full bg-[#D1F2EE] border border-[#B7E6DF] flex items-center justify-center text-[10px] font-bold text-[#0D9488]">
+                            {(comm.owner || comm.assignee || "AI")?.charAt(0).toUpperCase() ?? "A"}
                           </div>
-                          <span className="font-medium text-slate-300">
+                          <span className="font-medium text-[#0F292B]">
                             {comm.owner || comm.assignee || "Assigned by AI"}
                           </span>
                         </div>
                       </td>
 
                       {/* Meeting */}
-                      <td className="py-4 px-4 text-slate-400 whitespace-nowrap">
+                      <td className="py-4 px-4 text-slate-600 whitespace-nowrap">
                         {comm.meeting?.title || "Meeting Session"}
                       </td>
 
@@ -148,26 +148,20 @@ export const CommitmentsTable: React.FC<CommitmentsTableProps> = ({
                       {/* Confidence Score */}
                       <td className="py-4 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                          <div className="w-16 h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                          <div className="w-16 h-1.5 rounded-full bg-[#D1F2EE] overflow-hidden">
                             <div
-                              className={`h-full rounded-full ${
-                                conf > 80
-                                  ? "bg-gradient-to-r from-blue-500 to-cyan-400"
-                                  : conf > 50
-                                    ? "bg-amber-400"
-                                    : "bg-rose-500"
-                              }`}
+                              className="h-full rounded-full bg-gradient-to-r from-[#0D9488] to-[#0284C7]"
                               style={{ width: `${conf}%` }}
                             />
                           </div>
-                          <span className="font-mono text-[11px] font-bold text-slate-300">
+                          <span className="font-mono text-[11px] font-bold text-[#0F292B]">
                             {conf}%
                           </span>
                         </div>
                       </td>
 
                       {/* Created Timestamp */}
-                      <td className="py-4 px-6 text-right text-[11px] text-slate-400 font-mono whitespace-nowrap">
+                      <td className="py-4 px-6 text-right text-[11px] text-slate-500 font-mono whitespace-nowrap">
                         {new Date(comm.created_at).toLocaleDateString()}
                       </td>
                     </tr>
@@ -178,17 +172,17 @@ export const CommitmentsTable: React.FC<CommitmentsTableProps> = ({
           </div>
 
           {/* Mobile Card List View */}
-          <div className="md:hidden divide-y divide-white/5 p-2">
+          <div className="md:hidden divide-y divide-[#D1F2EE] p-2">
             {commitments.map((comm) => {
               const conf = getConfidencePercentage(comm);
               return (
                 <div
                   key={comm.id}
                   onClick={() => onSelectCommitment(comm)}
-                  className="p-4 rounded-2xl hover:bg-blue-600/10 transition-colors space-y-3 cursor-pointer"
+                  className="p-4 rounded-2xl hover:bg-[#D1F2EE]/30 transition-colors space-y-3 cursor-pointer"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <span className="font-semibold text-sm text-slate-200">{comm.title}</span>
+                    <span className="font-semibold text-sm text-[#0F292B]">{comm.title}</span>
                     <span
                       className={`px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 ${getStatusBadge(
                         comm.status,
@@ -198,9 +192,9 @@ export const CommitmentsTable: React.FC<CommitmentsTableProps> = ({
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
+                  <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
                     <span>{comm.owner || comm.assignee || "Assigned"}</span>
-                    <span className="font-mono text-cyan-400">{conf}% Verified</span>
+                    <span className="font-mono text-[#0D9488] font-semibold">{conf}% Verified</span>
                   </div>
                 </div>
               );

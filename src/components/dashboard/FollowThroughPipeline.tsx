@@ -25,20 +25,21 @@ export const FollowThroughPipeline: React.FC<FollowThroughPipelineProps> = ({
     return null;
   }
 
-  const activeItem = commitments[selectedIndex] || commitments[0];
+  const activeItem = commitments[selectedIndex] ?? commitments[0];
+  if (!activeItem) return null;
 
   const getStatusBadge = (status: string) => {
     const s = (status || "").toLowerCase();
     if (s.includes("complete") || s === "done") {
-      return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
+      return "bg-[#D1F2EE] text-[#0F766E] border-[#B7E6DF]";
     }
     if (s.includes("progress") || s === "ongoing") {
-      return "bg-blue-500/15 text-blue-400 border-blue-500/30";
+      return "bg-[#E6F2FF] text-[#0369A1] border-[#B7E6DF]";
     }
     if (s.includes("risk") || s === "blocked") {
-      return "bg-rose-500/15 text-rose-400 border-rose-500/30";
+      return "bg-[#F9EAF0] text-[#9D174D] border-[#B7E6DF]";
     }
-    return "bg-amber-500/15 text-amber-400 border-amber-500/30";
+    return "bg-[#D1F2EE]/50 text-[#115E59] border-[#B7E6DF]";
   };
 
   const getConf = (c: ApiCommitment) => {
@@ -52,37 +53,34 @@ export const FollowThroughPipeline: React.FC<FollowThroughPipelineProps> = ({
   };
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/70 p-6 sm:p-8 backdrop-blur-2xl shadow-xl">
-      {/* Background ambient gradient */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-600/10 via-cyan-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
-
+    <div className="relative overflow-hidden rounded-3xl border border-[#B7E6DF] bg-white/90 p-6 sm:p-8 shadow-sm">
       {/* Header with selector */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#D1F2EE]">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-            <h3 className="text-lg font-bold tracking-tight text-white">
+            <span className="w-2 h-2 rounded-full bg-[#0D9488] animate-pulse" />
+            <h3 className="text-lg font-bold tracking-tight text-[#0F292B]">
               Commitment Follow-Through Trace
             </h3>
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-[#115E59]">
             Live telemetry and agent evaluation pipeline.
           </p>
         </div>
 
         {/* Trace Item Selector tabs */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-950/70 border border-white/10 overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#D1F2EE] border border-[#B7E6DF] overflow-x-auto">
           {commitments.slice(0, 3).map((item, idx) => (
             <button
               key={item.id}
               onClick={() => setSelectedIndex(idx)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 selectedIndex === idx
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                  ? "bg-[#0D9488] text-white shadow-xs"
+                  : "text-[#115E59] hover:text-[#0F292B] hover:bg-[#B7E6DF]/50"
               }`}
             >
-              {item.title.slice(0, 20)}...
+              {item.title.slice(0, 22)}...
             </button>
           ))}
         </div>
@@ -91,89 +89,89 @@ export const FollowThroughPipeline: React.FC<FollowThroughPipelineProps> = ({
       {/* End-to-End Pipeline Visualization Flow */}
       <div className="py-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 relative">
-          {/* Step 1: Meeting Source */}
-          <div className="relative rounded-2xl bg-slate-950/60 border border-white/5 p-4 flex flex-col justify-between group hover:border-blue-500/30 transition-all">
-            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-2">
+          {/* Step 1: Meeting Source (Airy Sky Blue) */}
+          <div className="relative rounded-2xl bg-[#E6F2FF]/70 border border-[#B7E6DF] p-4 flex flex-col justify-between group hover:border-[#0284C7] transition-all shadow-2xs">
+            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-[#0369A1] font-semibold mb-2">
               <span>1. Source Meeting</span>
-              <Video className="w-3.5 h-3.5 text-blue-400" />
+              <Video className="w-3.5 h-3.5 text-[#0284C7]" />
             </div>
             <div>
-              <span className="block text-xs font-bold text-white mb-0.5">
+              <span className="block text-xs font-bold text-[#0F292B] mb-0.5">
                 {activeItem.meeting?.title || "Meeting Session"}
               </span>
-              <span className="block text-[11px] text-slate-400">Whisper STT Transcribed</span>
+              <span className="block text-[11px] text-slate-500">Whisper STT Transcribed</span>
             </div>
-            <div className="mt-3 pt-2 border-t border-white/5 text-[10px] text-cyan-400 font-mono">
+            <div className="mt-3 pt-2 border-t border-[#B7E6DF]/70 text-[10px] text-[#0284C7] font-mono font-medium">
               Captured in meeting
             </div>
           </div>
 
-          {/* Step 2: Commitment */}
-          <div className="relative rounded-2xl bg-slate-950/60 border border-blue-500/25 p-4 flex flex-col justify-between shadow-lg shadow-blue-500/5">
-            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-blue-400 mb-2">
+          {/* Step 2: Commitment (Soft Aqua) */}
+          <div className="relative rounded-2xl bg-[#D1F2EE]/70 border border-[#B7E6DF] p-4 flex flex-col justify-between shadow-2xs">
+            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-[#0F766E] font-semibold mb-2">
               <span>2. Action Item</span>
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <Sparkles className="w-3.5 h-3.5 text-[#0D9488]" />
             </div>
             <div>
-              <span className="block text-xs font-bold text-slate-100 line-clamp-2 mb-0.5">
+              <span className="block text-xs font-bold text-[#0F292B] line-clamp-2 mb-0.5">
                 {activeItem.title}
               </span>
               {activeItem.description && (
-                <span className="block text-[10px] text-slate-400 line-clamp-1">{activeItem.description}</span>
+                <span className="block text-[10px] text-slate-500 line-clamp-1">{activeItem.description}</span>
               )}
             </div>
-            <div className="mt-3 pt-2 border-t border-white/5 text-[10px] text-blue-300 font-mono">
+            <div className="mt-3 pt-2 border-t border-[#B7E6DF]/70 text-[10px] text-[#0D9488] font-mono font-medium">
               Extracted by Agent
             </div>
           </div>
 
-          {/* Step 3: Owner */}
-          <div className="relative rounded-2xl bg-slate-950/60 border border-white/5 p-4 flex flex-col justify-between group hover:border-blue-500/30 transition-all">
-            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-2">
+          {/* Step 3: Owner (Coastal Blush) */}
+          <div className="relative rounded-2xl bg-[#F9EAF0]/70 border border-[#B7E6DF] p-4 flex flex-col justify-between group hover:border-[#BE185D] transition-all shadow-2xs">
+            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-[#9D174D] font-semibold mb-2">
               <span>3. Accountability</span>
-              <User className="w-3.5 h-3.5 text-violet-400" />
+              <User className="w-3.5 h-3.5 text-[#BE185D]" />
             </div>
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-blue-600/30 border border-blue-500/30 flex items-center justify-center font-bold text-cyan-300 text-xs">
-                {(activeItem.owner || activeItem.assignee || "AI")[0].toUpperCase()}
+              <div className="w-8 h-8 rounded-full bg-white border border-[#B7E6DF] flex items-center justify-center font-bold text-[#BE185D] text-xs shadow-2xs">
+                {(activeItem.owner || activeItem.assignee || "AI")?.charAt(0).toUpperCase() ?? "A"}
               </div>
               <div>
-                <span className="block text-xs font-bold text-white">
+                <span className="block text-xs font-bold text-[#0F292B]">
                   {activeItem.owner || activeItem.assignee || "Assigned by AI"}
                 </span>
-                <span className="block text-[10px] text-slate-400">Team Member</span>
+                <span className="block text-[10px] text-slate-500">Team Member</span>
               </div>
             </div>
-            <div className="mt-3 pt-2 border-t border-white/5 text-[10px] text-slate-400 font-mono">
+            <div className="mt-3 pt-2 border-t border-[#B7E6DF]/70 text-[10px] text-slate-500 font-mono">
               Accountable Owner
             </div>
           </div>
 
-          {/* Step 4: Status & Confidence */}
-          <div className="relative rounded-2xl bg-gradient-to-br from-slate-950 to-blue-950/40 border border-cyan-500/30 p-4 flex flex-col justify-between shadow-xl shadow-cyan-500/5">
-            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-cyan-400 mb-2">
+          {/* Step 4: Status & Confidence (Ocean Breeze Mint) */}
+          <div className="relative rounded-2xl bg-gradient-to-br from-[#D1F2EE] to-[#E6F2FF]/60 border border-[#0D9488] p-4 flex flex-col justify-between shadow-2xs">
+            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-[#0F766E] font-semibold mb-2">
               <span>4. AI Verification</span>
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#0D9488]" />
             </div>
             <div>
               <span
-                className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-bold border ${getStatusBadge(
+                className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${getStatusBadge(
                   activeItem.status,
                 )} mb-1.5`}
               >
                 {activeItem.status}
               </span>
-              <div className="flex items-center gap-1.5 text-[11px] text-cyan-300">
-                <Sparkles className="w-3 h-3 text-cyan-400" />
-                <span className="font-mono font-bold">{getConf(activeItem)}% Confidence</span>
+              <div className="flex items-center gap-1.5 text-[11px] text-[#0F766E] font-semibold">
+                <Sparkles className="w-3 h-3 text-[#0D9488]" />
+                <span className="font-mono">{getConf(activeItem)}% Confidence</span>
               </div>
             </div>
             <button
               onClick={() => onSelectCommitment(activeItem)}
-              className="mt-3 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-200 hover:text-white font-semibold group cursor-pointer"
+              className="mt-3 pt-2 border-t border-[#B7E6DF] flex items-center justify-between text-[10px] text-[#0F292B] hover:text-[#0D9488] font-bold group cursor-pointer"
             >
               <span>Inspect Commitment</span>
-              <ChevronRight className="w-3 h-3 text-cyan-400 group-hover:translate-x-0.5 transition-transform" />
+              <ChevronRight className="w-3 h-3 text-[#0D9488] group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>
         </div>

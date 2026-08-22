@@ -34,7 +34,7 @@ export function GoogleLoginButton() {
       setDemoLoading(true);
       await authenticateWithBackend("demo@vocallabs.ai", "Demo Participant");
       navigate({ to: "/dashboard" });
-    } catch (err: any) {
+    } catch (err) {
       setError(err.message || "Failed to authenticate with backend");
     } finally {
       setDemoLoading(false);
@@ -45,26 +45,26 @@ export function GoogleLoginButton() {
     <div className="w-full max-w-sm mx-auto flex flex-col items-center gap-8 px-4">
       {/* Logo + Brand */}
       <div className="flex flex-col items-center gap-3 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center shadow-2xl shadow-blue-500/40">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#0D9488] via-[#0891B2] to-[#0284C7] flex items-center justify-center shadow-lg shadow-[#0D9488]/30 text-white">
           <Sparkles className="w-8 h-8 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">VocalLabs</h1>
-          <p className="text-sm text-slate-400 mt-1">Autonomous Post-Meeting Intelligence</p>
+          <h1 className="text-2xl font-extrabold text-[#0F292B] tracking-tight">VocalLabs</h1>
+          <p className="text-sm text-[#115E59] mt-1 font-medium">Autonomous Post-Meeting Intelligence</p>
         </div>
       </div>
 
       {/* Card */}
-      <div className="w-full rounded-3xl border border-white/10 bg-slate-900/70 backdrop-blur-2xl shadow-2xl shadow-black/60 p-8 flex flex-col gap-6">
+      <div className="w-full rounded-3xl border border-[#B7E6DF] bg-[#F3FFFE]/95 backdrop-blur-2xl shadow-xl shadow-[#0D9488]/5 p-8 flex flex-col gap-6">
         <div className="text-center">
-          <h2 className="text-lg font-bold text-white">Sign in to continue</h2>
-          <p className="text-xs text-slate-400 mt-1">Access your workspace meetings and follow-throughs.</p>
+          <h2 className="text-lg font-bold text-[#0F292B]">Sign in to continue</h2>
+          <p className="text-xs text-[#115E59] mt-1">Access your workspace meetings and follow-throughs.</p>
         </div>
 
         {/* Error Notification */}
         {error && (
-          <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+          <div className="p-3.5 rounded-2xl bg-[#F9EAF0] border border-[#B7E6DF] text-[#9D174D] text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-[#BE185D]" />
             <span>{error}</span>
           </div>
         )}
@@ -74,10 +74,10 @@ export function GoogleLoginButton() {
           type="button"
           onClick={handleGoogleLogin}
           disabled={loading || demoLoading}
-          className="w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-2xl bg-white hover:bg-slate-100 active:scale-[0.98] text-slate-900 font-semibold text-sm shadow-xl shadow-black/40 hover:shadow-2xl transition-all duration-200 cursor-pointer disabled:opacity-60"
+          className="w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-2xl bg-white hover:bg-[#D1F2EE]/30 active:scale-[0.98] text-[#0F292B] font-semibold text-sm border border-[#B7E6DF] shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer disabled:opacity-60"
         >
           {loading ? (
-            <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+            <Loader2 className="w-5 h-5 animate-spin text-[#0D9488]" />
           ) : (
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -103,9 +103,9 @@ export function GoogleLoginButton() {
 
         {/* Divider */}
         <div className="flex items-center gap-3">
-          <div className="flex-1 border-t border-white/10" />
-          <span className="text-[10px] uppercase tracking-widest text-slate-500 font-medium">or</span>
-          <div className="flex-1 border-t border-white/10" />
+          <div className="flex-1 border-t border-[#B7E6DF]" />
+          <span className="text-[10px] uppercase tracking-widest text-[#115E59] font-semibold">or</span>
+          <div className="flex-1 border-t border-[#B7E6DF]" />
         </div>
 
         {/* Demo Account Access with real FastAPI token */}
@@ -113,18 +113,18 @@ export function GoogleLoginButton() {
           type="button"
           onClick={handleDemoAccess}
           disabled={loading || demoLoading}
-          className="w-full py-3 px-4 rounded-2xl text-xs font-semibold text-cyan-300 border border-cyan-500/30 bg-cyan-950/40 hover:bg-cyan-900/50 active:scale-[0.99] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
+          className="w-full py-3 px-4 rounded-2xl text-xs font-semibold text-[#0F766E] border border-[#B7E6DF] bg-[#D1F2EE] hover:bg-[#B7E6DF] active:scale-[0.99] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60 shadow-2xs"
         >
           {demoLoading ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0D9488]" />
           ) : (
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <Sparkles className="w-3.5 h-3.5 text-[#0D9488]" />
           )}
           <span>{demoLoading ? "Authenticating with Backend..." : "Continue with Fast Demo Access"}</span>
         </button>
       </div>
 
-      <p className="text-[11px] text-slate-500 text-center">
+      <p className="text-[11px] text-[#115E59] text-center font-medium">
         Powered by VocalLabs AI &amp; FastAPI Backend Engine.
       </p>
     </div>

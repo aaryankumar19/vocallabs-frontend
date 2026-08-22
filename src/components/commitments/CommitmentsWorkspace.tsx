@@ -58,19 +58,19 @@ export const CommitmentsWorkspace: React.FC<CommitmentsWorkspaceProps> = ({
   return (
     <div className="space-y-6">
       {/* Workspace Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl border border-white/10 bg-slate-900/70 backdrop-blur-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl border border-[#B7E6DF] bg-white/90 shadow-sm">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 rounded-full bg-cyan-400" />
-            <h2 className="text-xl font-bold tracking-tight text-white">Commitments Workspace</h2>
+            <span className="w-2 h-2 rounded-full bg-[#0D9488]" />
+            <h2 className="text-xl font-bold tracking-tight text-[#0F292B]">Commitments Workspace</h2>
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-[#115E59]">
             Autonomous post-meeting tracking, evidence verification, and AI follow-through.
           </p>
         </div>
 
         {/* View Tabs */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-950/80 border border-white/10 overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-[#D1F2EE] border border-[#B7E6DF] overflow-x-auto">
           {[
             { id: "all", label: `All (${commitments.length})` },
             {
@@ -91,8 +91,8 @@ export const CommitmentsWorkspace: React.FC<CommitmentsWorkspaceProps> = ({
               onClick={() => setFilterTab(tab.id as any)}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 filterTab === tab.id
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                  ? "bg-[#0D9488] text-white shadow-xs font-bold"
+                  : "text-[#115E59] hover:text-[#0F292B] hover:bg-[#B7E6DF]/50"
               }`}
             >
               {tab.label}
@@ -104,7 +104,7 @@ export const CommitmentsWorkspace: React.FC<CommitmentsWorkspaceProps> = ({
       {/* Search & Sort Filters */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-80">
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
             <Search className="w-4 h-4" />
           </div>
           <input
@@ -112,16 +112,16 @@ export const CommitmentsWorkspace: React.FC<CommitmentsWorkspaceProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Filter by title, owner, meeting..."
-            className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900/60 border border-white/10 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+            className="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-[#B7E6DF] text-xs text-[#0F292B] placeholder-slate-400 focus:outline-none focus:border-[#0D9488] focus:ring-2 focus:ring-[#D1F2EE] shadow-2xs transition-all"
           />
         </div>
 
         <div className="flex items-center gap-2 self-end sm:self-auto">
-          <span className="text-xs text-slate-400">Sort by:</span>
+          <span className="text-xs text-[#115E59]">Sort by:</span>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-3 py-2 rounded-xl bg-slate-900/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-blue-500 cursor-pointer"
+            className="px-3 py-2 rounded-xl bg-white border border-[#B7E6DF] text-xs text-[#0F292B] focus:outline-none focus:border-[#0D9488] shadow-2xs cursor-pointer"
           >
             <option value="created">Latest Created</option>
             <option value="confidence">Highest AI Confidence</option>
