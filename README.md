@@ -314,7 +314,7 @@ python test_verification_agent.py
 
 ## 👥 Authors & Contributing
 
-- **Lead Developer**: Aaryan Kumar ([@aaryanaks3](mailto:aaryanaks3@gmail.com))
+- **Lead Developer**: Amit Krishna, Atif Khan, Aaryan Kumar ([@aaryanaks3](mailto:aaryanaks3@gmail.com))
 - Contributions, bug reports, and feature suggestions are welcome. Please open an issue or pull request!
 
 ---
