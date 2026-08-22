@@ -99,7 +99,10 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const isRecordingRef = useRef(false);
+  const isSpeakingRef = useRef(false);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const maxChunkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const recordingStartTimeRef = useRef<number>(0);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animFrameRef = useRef<number | null>(null);
@@ -152,7 +155,7 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
 
         // VAD loop
         const data = new Uint8Array(analyser.frequencyBinCount);
-        const SPEECH_THRESHOLD = 20;
+        const SPEECH_THRESHOLD = 18;
 
         const tick = () => {
           if (!analyserRef.current) return;
@@ -164,20 +167,22 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
 
           const speaking = avg > SPEECH_THRESHOLD && !isMutedRef.current;
           setIsSpeaking(speaking);
+          isSpeakingRef.current = speaking;
 
           if (speaking) {
             if (silenceTimerRef.current) {
               clearTimeout(silenceTimerRef.current);
               silenceTimerRef.current = null;
             }
-            if (!isRecordingRef.current) {
-              startChunk(streamRef.current!);
+            if (!isRecordingRef.current && streamRef.current) {
+              startChunk(streamRef.current);
             }
           } else {
             if (isRecordingRef.current && !silenceTimerRef.current) {
+              // 1-second silence delay: upload fragment when speech pauses for 1s
               silenceTimerRef.current = setTimeout(() => {
                 flushChunk();
-              }, 2000);
+              }, 1000);
             }
           }
 
@@ -202,6 +207,7 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
       cancelled = true;
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      if (maxChunkTimerRef.current) clearTimeout(maxChunkTimerRef.current);
       stopMicTracks();
       if (audioContextRef.current) audioContextRef.current.close().catch(() => {});
     };
@@ -315,8 +321,14 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
             toast.info(`${participant.name || participant.identity} left`);
             syncParticipants();
           })
-          .on(RoomEvent.ActiveSpeakersChanged, () => {
+          .on(RoomEvent.ActiveSpeakersChanged, (speakers) => {
             syncParticipants();
+            // Speaker change detection: if local user was recording and another speaker takes over, flush chunk
+            const isLocalActive = speakers.some((s) => s.isLocal);
+            if (!isLocalActive && isRecordingRef.current) {
+              console.log("[LiveAudio] Active speaker changed from local -> flushing audio chunk");
+              flushChunk();
+            }
           })
           .on(RoomEvent.TrackMuted, () => {
             syncParticipants();
@@ -428,6 +440,7 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
   // 3. Audio Chunk Recording & Upload for Sequential Whisper STT
   // --------------------------------------------------------------------------
   const startChunk = (stream: MediaStream) => {
+    if (isMutedRef.current || isRecordingRef.current) return;
     try {
       audioChunksRef.current = [];
       const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
@@ -438,45 +451,81 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
 
       const recorder = new MediaRecorder(stream, { mimeType });
       mediaRecorderRef.current = recorder;
+      recordingStartTimeRef.current = Date.now();
 
       recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) audioChunksRef.current.push(e.data);
+        if (e.data && e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
+        }
       };
 
-      recorder.start(250);
+      recorder.start(100);
       isRecordingRef.current = true;
+
+      // Max continuous chunk duration: 1.5s interval to ensure fragments are sent progressively
+      if (maxChunkTimerRef.current) clearTimeout(maxChunkTimerRef.current);
+      maxChunkTimerRef.current = setTimeout(() => {
+        if (isRecordingRef.current) {
+          flushChunk().then(() => {
+            if (isSpeakingRef.current && !isMutedRef.current && streamRef.current) {
+              startChunk(streamRef.current);
+            }
+          });
+        }
+      }, 1500);
     } catch (err: any) {
-      console.error("MediaRecorder start error:", err);
+      console.error("[LiveAudio] MediaRecorder start error:", err);
     }
   };
 
-  const flushChunk = () => {
+  const flushChunk = async (): Promise<void> => {
     if (!mediaRecorderRef.current || !isRecordingRef.current) return;
     isRecordingRef.current = false;
 
-    mediaRecorderRef.current.onstop = async () => {
-      const mimeType = mediaRecorderRef.current?.mimeType || "audio/webm";
-      const blob = new Blob(audioChunksRef.current, { type: mimeType });
-      audioChunksRef.current = [];
-
-      if (blob.size > 1000) {
-        await uploadChunk(blob);
-      }
-    };
-
-    try {
-      mediaRecorderRef.current.stop();
-    } catch (e) {
-      console.error(e);
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
     }
+    if (maxChunkTimerRef.current) {
+      clearTimeout(maxChunkTimerRef.current);
+      maxChunkTimerRef.current = null;
+    }
+
+    const recorder = mediaRecorderRef.current;
+    mediaRecorderRef.current = null;
+
+    return new Promise((resolve) => {
+      recorder.onstop = async () => {
+        const mimeType = recorder.mimeType || "audio/webm";
+        const blob = new Blob(audioChunksRef.current, { type: mimeType });
+        audioChunksRef.current = [];
+
+        if (blob.size > 800) {
+          await uploadChunk(blob);
+        }
+        resolve();
+      };
+
+      try {
+        if (recorder.state !== "inactive") {
+          recorder.stop();
+        } else {
+          resolve();
+        }
+      } catch (e) {
+        console.error("[LiveAudio] Error stopping recorder:", e);
+        resolve();
+      }
+    });
   };
 
   const uploadChunk = async (blob: Blob) => {
+    const chunkTimestamp = Date.now();
     try {
       const authToken = getAuthToken();
       const formData = new FormData();
       formData.append("meeting_id", meetingId);
-      formData.append("file", blob, `speech_${Date.now()}.webm`);
+      formData.append("file", blob, `speech_${chunkTimestamp}.webm`);
 
       const headers: Record<string, string> = {};
       if (authToken) {
@@ -484,32 +533,40 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
         headers["x-auth-token"] = authToken;
       }
 
+      console.log(`[LiveAudio] Uploading audio fragment: size=${blob.size}B, meeting=${meetingId}`);
+
       const res = await fetch(`${BACKEND_URL}/api/v1/livekit/upload-audio`, {
         method: "POST",
         headers,
         body: formData,
       });
 
-      if (res.ok) {
-        const data = await res.json().catch(() => ({}));
-        const transcriptText = data.transcript_text || data.message || "Speech processed";
-
-        setTranscripts((prev) => [
-          {
-            id: data.file_id || String(Date.now()),
-            speaker: userName,
-            timestamp: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-            }),
-            text: transcriptText,
-          },
-          ...prev,
-        ]);
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => "");
+        throw new Error(`Upload failed (${res.status}): ${errorText || res.statusText}`);
       }
+
+      const data = await res.json().catch(() => ({}));
+      console.log("[LiveAudio] Audio fragment uploaded successfully:", data);
+
+      const transcriptText = data.transcript_text || data.message || "Audio chunk queued for STT";
+
+      setTranscripts((prev) => [
+        {
+          id: data.file_id || String(chunkTimestamp),
+          speaker: userName,
+          timestamp: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          }),
+          text: transcriptText,
+        },
+        ...prev,
+      ]);
     } catch (err: any) {
-      console.error("Upload error:", err);
+      console.error("[LiveAudio] Chunk upload error:", err);
+      toast.error(`Audio upload error: ${err.message || "Failed to upload audio chunk"}`);
     }
   };
 
@@ -538,17 +595,30 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
 
     if (newMuted) {
       setIsSpeaking(false);
+      isSpeakingRef.current = false;
       if (silenceTimerRef.current) {
         clearTimeout(silenceTimerRef.current);
         silenceTimerRef.current = null;
       }
-      if (isRecordingRef.current) flushChunk();
+      if (maxChunkTimerRef.current) {
+        clearTimeout(maxChunkTimerRef.current);
+        maxChunkTimerRef.current = null;
+      }
+      if (isRecordingRef.current) {
+        await flushChunk();
+      }
     }
   };
 
   const handleEndMeeting = async () => {
     setIsEnding(true);
     try {
+      // 1. Flush any pending audio fragment and await upload before ending
+      if (isRecordingRef.current) {
+        await flushChunk();
+      }
+
+      // 2. Call backend meeting end endpoint
       if (groupId) {
         await endGroupMeeting(groupId, meetingId);
         toast.success("Meeting ended — transcription queued for AI commitment extraction!");
