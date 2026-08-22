@@ -363,7 +363,7 @@ export async function getLiveKitToken(
   roomName: string,
   identity: string,
   name?: string,
-  groupId?: string,
+  groupId?: string | null,
 ): Promise<LiveKitTokenResponse> {
   return request<LiveKitTokenResponse>("/api/v1/livekit/token", {
     method: "POST",

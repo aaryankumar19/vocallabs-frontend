@@ -65,36 +65,31 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
   groupId,
   livekitUrl: propLivekitUrl,
   token: propToken,
-  title = "Live Audio Session",
+  title = "Live Audio Room",
   onLeave,
 }) => {
   const user = getAuthUser();
   const userName = user?.name || user?.email?.split("@")[0] || "Participant";
+  const userEmail = user?.email || user?.id || `user-${Date.now().toString(36)}`;
 
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("Initializing audio room...");
+  const [statusMessage, setStatusMessage] = useState("Connecting to live audio room...");
   const [micReady, setMicReady] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
-
   const [connectionStatus, setConnectionStatus] = useState<
     "connecting" | "connected" | "reconnecting" | "disconnected"
   >("connecting");
-  const [participants, setParticipants] = useState<ParticipantInfo[]>([]);
 
+  const [participants, setParticipants] = useState<ParticipantInfo[]>([]);
   const [transcripts, setTranscripts] = useState<TranscriptEntry[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [inputChat, setInputChat] = useState("");
-  const [activeTab, setActiveTab] = useState<"transcripts" | "chat" | "participants">(
-    "transcripts",
-  );
+  const [activeTab, setActiveTab] = useState<"transcripts" | "chat" | "participants">("transcripts");
   const [isEnding, setIsEnding] = useState(false);
 
-  // Audio & LiveKit state refs
+  // Audio & LiveKit State Refs
   const roomRef = useRef<Room | null>(null);
-  const remoteAudioElementsRef = useRef<Map<string, HTMLAudioElement>>(new Map());
-  const audioContainerRef = useRef<HTMLDivElement | null>(null);
-
   const streamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -107,6 +102,8 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const audioContainerRef = useRef<HTMLDivElement | null>(null);
+  const remoteAudioElementsRef = useRef<Map<string, HTMLAudioElement>>(new Map());
 
   const isMutedRef = useRef(isMuted);
   useEffect(() => {
@@ -114,7 +111,7 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
   }, [isMuted]);
 
   // --------------------------------------------------------------------------
-  // 1. Initialize Microphone (Local VAD & Audio Chunking for STT)
+  // 1. Initialize Microphone & Real-time VAD
   // --------------------------------------------------------------------------
   useEffect(() => {
     let cancelled = false;
@@ -137,7 +134,7 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
 
         streamRef.current = stream;
 
-        // AudioContext for real-time VAD visualization and chunk slicing
+        // Web Audio API Context for real-time speech visualizer
         const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
         const ctx = new AudioCtx();
         audioContextRef.current = ctx;
@@ -151,11 +148,11 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
 
         setMicReady(true);
         setMicError(null);
-        setStatusMessage("Mic connected. Joining LiveKit room...");
+        setStatusMessage("Microphone active. Connecting to LiveKit WebRTC...");
 
-        // VAD loop
+        // Real-time Voice Activity Detection (VAD) loop
         const data = new Uint8Array(analyser.frequencyBinCount);
-        const SPEECH_THRESHOLD = 18;
+        const SPEECH_THRESHOLD = 22;
 
         const tick = () => {
           if (!analyserRef.current) return;
@@ -169,6 +166,7 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
           setIsSpeaking(speaking);
           isSpeakingRef.current = speaking;
 
+          // Chunk-based audio recording for Whisper STT
           if (speaking) {
             if (silenceTimerRef.current) {
               clearTimeout(silenceTimerRef.current);
@@ -194,8 +192,8 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
         if (cancelled) return;
         const msg =
           err.name === "NotAllowedError"
-            ? "Microphone permission denied. Please allow microphone access in your browser and reload."
-            : `Microphone error: ${err.message || err.name}`;
+            ? "Microphone permission denied. Please allow microphone permissions in your browser and refresh."
+            : `Microphone initialization error: ${err.message || err.name}`;
         setMicError(msg);
         setStatusMessage(msg);
       }
@@ -221,7 +219,7 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
   };
 
   // --------------------------------------------------------------------------
-  // 2. Connect to LiveKit Cloud Room (WebRTC Multi-Participant Broadcasting)
+  // 2. Initialize LiveKit WebRTC Multi-user Room
   // --------------------------------------------------------------------------
   useEffect(() => {
     let isCancelled = false;
@@ -229,67 +227,63 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
 
     const initLiveKit = async () => {
       try {
-        let lkToken = propToken;
-        let lkUrl = propLivekitUrl;
+        setConnectionStatus("connecting");
+        setStatusMessage("Fetching LiveKit WebRTC room credentials...");
 
-        // If token or URL not passed in props, fetch token dynamically from backend
-        if (!lkToken || !lkUrl) {
-          setStatusMessage("Fetching room credentials...");
-          const identity = user?.email || user?.id || `user-${Date.now().toString(36)}`;
-          const tokenRes = await getLiveKitToken(
-            roomName,
-            identity,
-            userName,
-            groupId || undefined,
-          );
-          lkToken = tokenRes.token;
-          lkUrl = tokenRes.livekit_url;
+        let targetUrl = propLivekitUrl;
+        let targetToken = propToken;
+
+        if (!targetUrl || !targetToken) {
+          const tokenData = await getLiveKitToken(roomName, userEmail, userName, groupId);
+          targetUrl = tokenData.livekit_url;
+          targetToken = tokenData.token;
         }
 
         if (isCancelled) return;
 
-        setConnectionStatus("connecting");
-        setStatusMessage("Connecting to LiveKit audio room...");
+        if (!targetUrl || !targetToken) {
+          throw new Error("Missing LiveKit connection URL or token from server");
+        }
 
         const room = new Room({
           adaptiveStream: true,
           dynacast: true,
           audioCaptureDefaults: {
+            autoGainControl: true,
             echoCancellation: true,
             noiseSuppression: true,
-            autoGainControl: true,
           },
         });
+
         activeRoom = room;
         roomRef.current = room;
 
         const syncParticipants = () => {
-          if (!room) return;
-          const list: ParticipantInfo[] = [];
+          if (!roomRef.current) return;
+          const current: ParticipantInfo[] = [];
 
-          // Local participant
-          list.push({
-            identity: room.localParticipant.identity,
-            name: room.localParticipant.name || userName,
-            isSpeaking: room.localParticipant.isSpeaking,
-            isMuted: !room.localParticipant.isMicrophoneEnabled,
-            isLocal: true,
-          });
+          if (roomRef.current.localParticipant) {
+            const lp = roomRef.current.localParticipant;
+            current.push({
+              identity: lp.identity,
+              name: lp.name || userName,
+              isSpeaking: lp.isSpeaking,
+              isMuted: isMutedRef.current,
+              isLocal: true,
+            });
+          }
 
-          // Remote participants
-          room.remoteParticipants.forEach((p) => {
-            const micPub = p.getTrackPublication(Track.Source.Microphone);
-            const isParticipantMuted = !micPub || micPub.isMuted;
-            list.push({
-              identity: p.identity,
-              name: p.name || p.identity,
-              isSpeaking: p.isSpeaking,
-              isMuted: isParticipantMuted,
+          roomRef.current.remoteParticipants.forEach((rp: RemoteParticipant) => {
+            current.push({
+              identity: rp.identity,
+              name: rp.name || rp.identity,
+              isSpeaking: rp.isSpeaking,
+              isMuted: !rp.isMicrophoneEnabled,
               isLocal: false,
             });
           });
 
-          setParticipants(list);
+          setParticipants(current);
         };
 
         // Room event listeners
@@ -349,76 +343,94 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
                 audioElement.id = `lk-audio-${participant.identity}-${track.sid}`;
                 audioElement.autoplay = true;
 
-                if (audioContainerRef.current) {
-                  audioContainerRef.current.appendChild(audioElement);
-                } else {
-                  document.body.appendChild(audioElement);
-                }
+        room.on(RoomEvent.Reconnecting, () => {
+          setConnectionStatus("reconnecting");
+          setStatusMessage("Reconnecting to LiveKit Room...");
+        });
 
-                remoteAudioElementsRef.current.set(track.sid, audioElement);
-                audioElement.play().catch((err) => {
-                  console.warn("Audio autoplay blocked or failed:", err);
-                });
+        room.on(RoomEvent.Reconnected, () => {
+          setConnectionStatus("connected");
+          setStatusMessage("Reconnected to LiveKit Room");
+          syncParticipants();
+        });
+
+        room.on(RoomEvent.Disconnected, () => {
+          setConnectionStatus("disconnected");
+          setStatusMessage("Disconnected from LiveKit Room");
+        });
+
+        room.on(RoomEvent.ParticipantConnected, (participant: RemoteParticipant) => {
+          toast.info(`${participant.name || participant.identity} joined the room`);
+          syncParticipants();
+        });
+
+        room.on(RoomEvent.ParticipantDisconnected, (participant: RemoteParticipant) => {
+          toast.info(`${participant.name || participant.identity} left the room`);
+          syncParticipants();
+        });
+
+        room.on(RoomEvent.ActiveSpeakersChanged, () => {
+          syncParticipants();
+        });
+
+        room.on(
+          RoomEvent.TrackSubscribed,
+          (track: RemoteTrack, publication: RemoteTrackPublication, participant: RemoteParticipant) => {
+            if (track.kind === Track.Kind.Audio) {
+              const audioElement = track.attach();
+              audioElement.id = `audio-${participant.identity}`;
+              if (audioContainerRef.current) {
+                audioContainerRef.current.appendChild(audioElement);
               }
-              syncParticipants();
-            },
-          )
-          .on(
-            RoomEvent.TrackUnsubscribed,
-            (
-              track: RemoteTrack,
-              publication: RemoteTrackPublication,
-              participant: RemoteParticipant,
-            ) => {
-              if (track.kind === Track.Kind.Audio) {
-                track.detach().forEach((el) => el.remove());
-                const existing = remoteAudioElementsRef.current.get(track.sid);
-                if (existing) {
-                  existing.remove();
-                  remoteAudioElementsRef.current.delete(track.sid);
-                }
-              }
-              syncParticipants();
-            },
-          )
-          .on(RoomEvent.DataReceived, (payload: Uint8Array, participant?: RemoteParticipant) => {
-            try {
-              const str = new TextDecoder().decode(payload);
-              const data = JSON.parse(str);
-              if (data.type === "chat") {
-                setChatMessages((prev) => [
-                  ...prev,
-                  {
-                    id: data.id || `msg-${Date.now()}-${Math.random()}`,
-                    sender:
-                      data.sender || participant?.name || participant?.identity || "Participant",
-                    timestamp:
-                      data.timestamp ||
-                      new Date().toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }),
-                    text: data.text,
-                  },
-                ]);
-                setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
-              }
-            } catch (e) {
-              console.error("Failed to parse data message", e);
+              remoteAudioElementsRef.current.set(participant.identity, audioElement);
             }
-          });
+          }
+        );
 
-        await room.connect(lkUrl, lkToken);
+        room.on(
+          RoomEvent.TrackUnsubscribed,
+          (track: RemoteTrack, publication: RemoteTrackPublication, participant: RemoteParticipant) => {
+            if (track.kind === Track.Kind.Audio) {
+              track.detach().forEach((el) => el.remove());
+              remoteAudioElementsRef.current.delete(participant.identity);
+            }
+          }
+        );
 
-        // Publish local microphone to LiveKit SFU so all other participants receive the audio
+        room.on(RoomEvent.DataReceived, (payload: Uint8Array, participant?: RemoteParticipant) => {
+          try {
+            const decoded = new TextDecoder().decode(payload);
+            const data = JSON.parse(decoded);
+            if (data.type === "chat") {
+              setChatMessages((prev) => [
+                ...prev,
+                {
+                  id: data.id || `msg-${Date.now()}`,
+                  sender: data.sender || participant?.name || "Participant",
+                  timestamp: data.timestamp || new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+                  text: data.text || "",
+                },
+              ]);
+            }
+          } catch (e) {
+            console.error("DataReceived parse error:", e);
+          }
+        });
+
+        await room.connect(targetUrl, targetToken);
+
+        if (isCancelled) {
+          room.disconnect();
+          return;
+        }
+
         await room.localParticipant.setMicrophoneEnabled(!isMutedRef.current);
         syncParticipants();
       } catch (err: any) {
         if (isCancelled) return;
         console.error("LiveKit connection error:", err);
         setConnectionStatus("disconnected");
-        setStatusMessage(`LiveKit error: ${err.message || "Failed to join room"}`);
-        toast.error(`LiveKit audio error: ${err.message || "Could not connect to room"}`);
+        setStatusMessage(`LiveKit notice: ${err.message || "Failed to join WebRTC room, using direct mic mode"}`);
       }
     };
 
@@ -430,7 +442,6 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
         activeRoom.disconnect();
         roomRef.current = null;
       }
-      // Clean up remote audio elements
       remoteAudioElementsRef.current.forEach((el) => el.remove());
       remoteAudioElementsRef.current.clear();
     };
@@ -577,7 +588,6 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
     const newMuted = !isMuted;
     setIsMuted(newMuted);
 
-    // Mute/unmute in LiveKit SFU (stops/starts sending audio packets to other participants)
     if (roomRef.current) {
       try {
         await roomRef.current.localParticipant.setMicrophoneEnabled(!newMuted);
@@ -586,7 +596,6 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
       }
     }
 
-    // Toggle local stream tracks for VAD/recorder
     if (streamRef.current) {
       streamRef.current.getAudioTracks().forEach((t) => {
         t.enabled = !newMuted;
@@ -652,10 +661,8 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
       text,
     };
 
-    // Add to local state
     setChatMessages((prev) => [...prev, newMsg]);
 
-    // Broadcast across all connected room participants via LiveKit Data Channel
     if (roomRef.current && roomRef.current.state === ConnectionState.Connected) {
       const payload = JSON.stringify({
         type: "chat",
@@ -678,14 +685,14 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
   };
 
   return (
-    <div className="flex flex-col w-full rounded-3xl border border-[#B7E6DF] bg-white overflow-hidden shadow-lg min-h-[calc(100vh-160px)]">
+    <div className="flex flex-col w-full rounded-3xl border border-[#B7E6DF] bg-white overflow-hidden shadow-lg min-h-[calc(100vh-140px)]">
       {/* Hidden audio container for remote LiveKit tracks */}
       <div ref={audioContainerRef} className="hidden" aria-hidden="true" />
 
       {/* Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5 border-b border-[#D1F2EE] bg-[#F3FFFE]/80">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5 border-b border-[#D1F2EE] bg-[#F3FFFE]/90 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#0D9488] to-[#0284C7] flex items-center justify-center shadow-md shadow-[#0D9488]/20 text-white">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#0D9488] to-[#0284C7] flex items-center justify-center shadow-md shadow-[#0D9488]/20 text-white shrink-0">
             <Radio className="w-4.5 h-4.5 animate-pulse" />
           </div>
           <div>
@@ -718,8 +725,8 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
             {connectionStatus === "connected"
               ? "LiveKit SFU Active"
               : connectionStatus === "connecting"
-                ? "Connecting LiveKit..."
-                : "Disconnected"}
+                ? "Connecting..."
+                : "Standalone Mic Mode"}
           </span>
 
           <span className="hidden md:flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-[#E6F2FF] border border-[#B7E6DF] text-[#0369A1] font-medium">
@@ -738,45 +745,43 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
       </div>
 
       {/* Main Content Grid */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 min-h-0">
         {/* Left: Audio Visualizer & Participants */}
-        <div className="lg:col-span-7 flex flex-col items-center justify-between p-6 sm:p-8 border-b lg:border-b-0 lg:border-r border-[#D1F2EE] bg-[#F3FFFE]/40 space-y-6">
+        <div className="lg:col-span-7 flex flex-col items-center justify-center p-6 sm:p-8 border-b lg:border-b-0 lg:border-r border-[#D1F2EE] bg-[#F3FFFE]/30 gap-5 overflow-y-auto">
           {micError ? (
             <div className="text-center space-y-3 max-w-sm my-auto">
-              <div className="w-20 h-20 rounded-full bg-[#F9EAF0] border-2 border-[#B7E6DF] flex items-center justify-center mx-auto text-[#BE185D]">
-                <MicOff className="w-8 h-8" />
+              <div className="w-16 h-16 rounded-full bg-[#F9EAF0] border-2 border-[#B7E6DF] flex items-center justify-center mx-auto text-[#BE185D]">
+                <MicOff className="w-7 h-7" />
               </div>
               <p className="text-sm font-bold text-[#9D174D]">Microphone Unavailable</p>
               <p className="text-xs text-[#115E59] leading-relaxed">{micError}</p>
             </div>
           ) : (
             <>
-              {/* Header tags */}
-              <div className="text-center space-y-1">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#D1F2EE] border border-[#B7E6DF] text-[11px] font-semibold text-[#0F766E]">
-                  <Sparkles className="w-3.5 h-3.5 text-[#0D9488]" />
-                  REAL-TIME WEBRTC AUDIO · 2S STT CHUNKING
-                </div>
+              {/* Header tag */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#D1F2EE] border border-[#B7E6DF] text-[11px] font-semibold text-[#0F766E]">
+                <Sparkles className="w-3.5 h-3.5 text-[#0D9488]" />
+                REAL-TIME WEBRTC AUDIO · 2S STT CHUNKING
               </div>
 
               {/* Central Mic Visualizer */}
-              <div className="relative flex items-center justify-center my-4">
+              <div className="relative flex items-center justify-center h-44 w-44">
                 {/* Outer pulsing rings */}
                 <div
-                  className={`absolute w-52 h-52 rounded-full transition-all duration-500 ${
-                    isSpeaking && !isMuted ? "bg-[#D1F2EE] scale-110 animate-ping" : "bg-[#F3FFFE]"
+                  className={`absolute inset-0 rounded-full transition-all duration-500 pointer-events-none ${
+                    isSpeaking && !isMuted ? "bg-[#D1F2EE] scale-125 animate-ping opacity-75" : "bg-[#F3FFFE] opacity-40"
                   }`}
                 />
                 <div
-                  className={`absolute w-40 h-40 rounded-full transition-all duration-400 ${
-                    isSpeaking && !isMuted ? "bg-[#B7E6DF]/70 scale-105" : "bg-[#D1F2EE]/50"
+                  className={`absolute inset-2 rounded-full transition-all duration-400 pointer-events-none ${
+                    isSpeaking && !isMuted ? "bg-[#B7E6DF]/70 scale-110" : "bg-[#D1F2EE]/40"
                   }`}
                 />
 
                 {/* Mic button */}
                 <button
                   onClick={handleToggleMute}
-                  className={`relative w-28 h-28 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 cursor-pointer ${
+                  className={`relative z-10 w-28 h-28 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 cursor-pointer ${
                     isMuted
                       ? "bg-[#F9EAF0] border-2 border-[#B7E6DF] text-[#BE185D] shadow-[#F9EAF0]"
                       : isSpeaking
@@ -794,7 +799,7 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
               </div>
 
               {/* Audio level bars */}
-              <div className="flex items-end gap-1 h-10 justify-center">
+              <div className="flex items-end gap-1 h-8 justify-center">
                 {Array.from({ length: 16 }).map((_, i) => {
                   const heights = [20, 45, 30, 65, 80, 50, 90, 70, 40, 85, 55, 75, 35, 60, 45, 25];
                   const h = isSpeaking && !isMuted ? Math.max(6, heights[i] ?? 6) : 6;
@@ -816,7 +821,7 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
               </div>
 
               {/* Status pill */}
-              <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white border border-[#B7E6DF] text-xs max-w-sm text-center shadow-2xs">
+              <div className="flex items-center gap-2 px-4 py-1.5 rounded-2xl bg-white border border-[#B7E6DF] text-xs max-w-sm text-center shadow-2xs">
                 <span
                   className={`w-2 h-2 rounded-full shrink-0 ${
                     isMuted
@@ -834,54 +839,56 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
               </div>
 
               {/* Participants in room strip */}
-              <div className="w-full max-w-md bg-white rounded-2xl border border-[#B7E6DF] p-3 shadow-2xs">
-                <div className="flex items-center justify-between text-[11px] font-semibold text-[#115E59] mb-2 px-1">
-                  <span className="flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5 text-[#0D9488]" />
-                    In Room ({participants.length})
-                  </span>
-                  <span className="text-[10px] text-slate-400">Live Audio Stream</span>
-                </div>
+              {participants.length > 0 && (
+                <div className="w-full max-w-md bg-white rounded-2xl border border-[#B7E6DF] p-3 shadow-2xs">
+                  <div className="flex items-center justify-between text-[11px] font-semibold text-[#115E59] mb-2 px-1">
+                    <span className="flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 text-[#0D9488]" />
+                      Connected ({participants.length})
+                    </span>
+                    <span className="text-[10px] text-slate-400">Live Audio Stream</span>
+                  </div>
 
-                <div className="flex flex-wrap gap-2">
-                  {participants.map((p) => (
-                    <div
-                      key={p.identity}
-                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs transition-all ${
-                        p.isSpeaking && !p.isMuted
-                          ? "bg-emerald-50 border-emerald-300 text-emerald-800 shadow-xs ring-2 ring-emerald-400/40"
-                          : p.isMuted
-                            ? "bg-slate-50 border-slate-200 text-slate-500"
-                            : "bg-[#F3FFFE] border-[#B7E6DF] text-[#0F292B]"
-                      }`}
-                    >
+                  <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+                    {participants.map((p) => (
                       <div
-                        className={`w-2 h-2 rounded-full ${
+                        key={p.identity}
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs transition-all ${
                           p.isSpeaking && !p.isMuted
-                            ? "bg-emerald-500 animate-ping"
+                            ? "bg-emerald-50 border-emerald-300 text-emerald-800 shadow-xs"
                             : p.isMuted
-                              ? "bg-rose-400"
-                              : "bg-slate-300"
+                              ? "bg-slate-50 border-slate-200 text-slate-500"
+                              : "bg-[#F3FFFE] border-[#B7E6DF] text-[#0F292B]"
                         }`}
-                      />
-                      <span className="font-medium text-[11px]">
-                        {p.name} {p.isLocal ? "(You)" : ""}
-                      </span>
-                      {p.isMuted ? (
-                        <MicOff className="w-3 h-3 text-rose-500" />
-                      ) : p.isSpeaking ? (
-                        <Volume2 className="w-3 h-3 text-emerald-600 animate-pulse" />
-                      ) : null}
-                    </div>
-                  ))}
+                      >
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            p.isSpeaking && !p.isMuted
+                              ? "bg-emerald-500 animate-ping"
+                              : p.isMuted
+                                ? "bg-rose-400"
+                                : "bg-slate-300"
+                          }`}
+                        />
+                        <span className="font-medium text-[11px]">
+                          {p.name} {p.isLocal ? "(You)" : ""}
+                        </span>
+                        {p.isMuted ? (
+                          <MicOff className="w-3 h-3 text-rose-500" />
+                        ) : p.isSpeaking ? (
+                          <Volume2 className="w-3 h-3 text-emerald-600 animate-pulse" />
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Controls row */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 pt-1">
                 <button
                   onClick={handleToggleMute}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`flex items-center gap-2 px-5 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                     isMuted
                       ? "bg-rose-600 hover:bg-rose-500 text-white shadow-sm shadow-rose-600/30"
                       : "bg-[#D1F2EE] hover:bg-[#B7E6DF] text-[#0F766E] border border-[#B7E6DF] shadow-2xs"
@@ -900,9 +907,9 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
         </div>
 
         {/* Right: Transcripts, Chat & Participants Tabs */}
-        <div className="lg:col-span-5 flex flex-col h-full min-h-[360px] bg-white">
+        <div className="lg:col-span-5 flex flex-col h-full min-h-[360px] bg-white border-t lg:border-t-0">
           {/* Tab Bar */}
-          <div className="flex items-center gap-1.5 p-3 border-b border-[#D1F2EE] bg-[#F3FFFE]">
+          <div className="flex items-center gap-1.5 p-3 border-b border-[#D1F2EE] bg-[#F3FFFE] shrink-0">
             <button
               onClick={() => setActiveTab("transcripts")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
@@ -939,7 +946,7 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
           </div>
 
           {/* Tab Content */}
-          <div className="flex-1 p-3 overflow-y-auto space-y-2.5">
+          <div className="flex-1 p-3 overflow-y-auto space-y-2.5 min-h-0">
             {activeTab === "transcripts" ? (
               transcripts.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center py-12 text-slate-400 space-y-2">
@@ -1049,7 +1056,7 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
           {activeTab === "chat" && (
             <form
               onSubmit={handleSendChat}
-              className="p-3 border-t border-[#D1F2EE] bg-[#F3FFFE] flex items-center gap-2"
+              className="p-3 border-t border-[#D1F2EE] bg-[#F3FFFE] flex items-center gap-2 shrink-0"
             >
               <input
                 type="text"
