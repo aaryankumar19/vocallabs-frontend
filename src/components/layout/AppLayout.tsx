@@ -33,13 +33,11 @@ export const AppLayout: React.FC = () => {
 
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [commitments, setCommitments] = useState<ApiCommitment[]>([]);
-  const [groupMeetings, setGroupMeetings] = useState<{
-    ongoing: MeetingItem[];
-    past: MeetingItem[];
-  }>({
+  const [groupMeetings, setGroupMeetings] = useState<{ ongoing: MeetingItem[]; past: MeetingItem[] }>({
     ongoing: [],
     past: [],
   });
+  const [isMeetingsLoading, setIsMeetingsLoading] = useState(false);
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -66,8 +64,12 @@ export const AppLayout: React.FC = () => {
 
   const loadMeetings = async (groupId?: string) => {
     const targetGroupId = groupId || selectedGroup?.id;
-    if (!targetGroupId) return;
+    if (!targetGroupId) {
+      setGroupMeetings({ ongoing: [], past: [] });
+      return;
+    }
     try {
+      setIsMeetingsLoading(true);
       const res = await getGroupMeetings(targetGroupId);
       setGroupMeetings({
         ongoing: res.ongoing_meetings || [],
@@ -75,6 +77,9 @@ export const AppLayout: React.FC = () => {
       });
     } catch (err) {
       console.error("Failed to load group meetings:", err);
+      setGroupMeetings({ ongoing: [], past: [] });
+    } finally {
+      setIsMeetingsLoading(false);
     }
   };
 
@@ -94,6 +99,8 @@ export const AppLayout: React.FC = () => {
       if (firstGroup) {
         setSelectedGroup(firstGroup);
         await loadMeetings(firstGroup.id);
+      } else {
+        setGroupMeetings({ ongoing: [], past: [] });
       }
     } catch (err) {
       console.error("Failed to load dashboard data:", err);
@@ -109,6 +116,8 @@ export const AppLayout: React.FC = () => {
   useEffect(() => {
     if (selectedGroup) {
       loadMeetings(selectedGroup.id);
+    } else {
+      setGroupMeetings({ ongoing: [], past: [] });
     }
   }, [selectedGroup?.id]);
 
@@ -116,6 +125,8 @@ export const AppLayout: React.FC = () => {
     setSelectedGroup(group);
     if (group) {
       loadMeetings(group.id);
+    } else {
+      setGroupMeetings({ ongoing: [], past: [] });
     }
   };
 
@@ -146,7 +157,7 @@ export const AppLayout: React.FC = () => {
     );
   });
 
-  const totalMeetingsCount = groupMeetings.ongoing.length + groupMeetings.past.length;
+  const totalMeetingsCount = (groupMeetings.ongoing?.length || 0) + (groupMeetings.past?.length || 0);
 
   return (
     <div className="min-h-screen bg-[#F3FFFE] text-[#0F292B] flex overflow-x-hidden selection:bg-[#D1F2EE] selection:text-[#0D9488]">
@@ -158,7 +169,12 @@ export const AppLayout: React.FC = () => {
       {/* Sidebar */}
       <Sidebar
         activeTab={activeTab}
-        onSelectTab={setActiveTab}
+        onSelectTab={(tab) => {
+          setActiveTab(tab);
+          if (tab === "meetings" && selectedGroup) {
+            loadMeetings(selectedGroup.id);
+          }
+        }}
         isOpenMobile={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
         meetingsCount={totalMeetingsCount}
@@ -234,6 +250,12 @@ export const AppLayout: React.FC = () => {
                 <div className="animate-in fade-in duration-200">
                   <MeetingsList
                     selectedGroup={selectedGroup}
+                    ongoingMeetings={groupMeetings.ongoing}
+                    pastMeetings={groupMeetings.past}
+                    isLoading={isMeetingsLoading}
+                    onRefreshMeetings={() => {
+                      if (selectedGroup) loadMeetings(selectedGroup.id);
+                    }}
                     onOpenNewMeeting={() => setIsNewMeetingModalOpen(true)}
                     onSelectCommitment={setSelectedCommitment}
                     onEnterLiveRoom={handleEnterLiveRoom}
@@ -260,8 +282,7 @@ export const AppLayout: React.FC = () => {
                       </h2>
                     </div>
                     <p className="text-xs text-[#115E59]">
-                      Live connection configuration to the VocalLabs FastAPI server and LiveKit
-                      WebRTC subsystems.
+                      Live connection configuration to the VocalLabs FastAPI server and LiveKit WebRTC subsystems.
                     </p>
                   </div>
 
@@ -274,9 +295,7 @@ export const AppLayout: React.FC = () => {
                         </div>
                         <div>
                           <h4 className="text-sm font-bold text-[#0F292B]">FastAPI Core Server</h4>
-                          <p className="text-xs text-slate-500 font-mono break-all">
-                            {BACKEND_URL}
-                          </p>
+                          <p className="text-xs text-slate-500 font-mono break-all">{BACKEND_URL}</p>
                         </div>
                       </div>
                       <div className="flex items-center justify-between pt-3 border-t border-[#D1F2EE] text-xs text-slate-500">
@@ -316,9 +335,7 @@ export const AppLayout: React.FC = () => {
                           <Radio className="w-5 h-5" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-[#0F292B]">
-                            Whisper Speech-to-Text
-                          </h4>
+                          <h4 className="text-sm font-bold text-[#0F292B]">Whisper Speech-to-Text</h4>
                           <p className="text-xs text-slate-500 font-mono">
                             {health?.whisper_stt?.url || "Remote Whisper STT API"}
                           </p>
@@ -339,12 +356,8 @@ export const AppLayout: React.FC = () => {
                           <Database className="w-5 h-5" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-[#0F292B]">
-                            Database &amp; R2 Storage
-                          </h4>
-                          <p className="text-xs text-slate-500">
-                            PostgreSQL transcripts &amp; Cloudflare R2 audio blobs
-                          </p>
+                          <h4 className="text-sm font-bold text-[#0F292B]">Database &amp; R2 Storage</h4>
+                          <p className="text-xs text-slate-500">PostgreSQL transcripts &amp; Cloudflare R2 audio blobs</p>
                         </div>
                       </div>
                       <div className="flex items-center justify-between pt-3 border-t border-[#D1F2EE] text-xs text-slate-500">
@@ -364,9 +377,7 @@ export const AppLayout: React.FC = () => {
                         </div>
                         <div>
                           <h4 className="text-sm font-bold text-[#0F292B]">Active User Identity</h4>
-                          <p className="text-xs text-slate-500">
-                            {currentUser?.email || "Authenticated"}
-                          </p>
+                          <p className="text-xs text-slate-500">{currentUser?.email || "Authenticated"}</p>
                         </div>
                       </div>
                       <div className="flex items-center justify-between pt-3 border-t border-[#D1F2EE] text-xs text-slate-500">
