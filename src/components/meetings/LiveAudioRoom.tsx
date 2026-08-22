@@ -685,7 +685,7 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
   };
 
   return (
-    <div className="flex flex-col w-full rounded-3xl border border-[#B7E6DF] bg-white overflow-hidden shadow-lg min-h-[calc(100vh-140px)]">
+    <div className="flex flex-col w-full rounded-3xl border border-[#B7E6DF] bg-white overflow-hidden shadow-lg h-[calc(100vh-140px)] max-h-[calc(100vh-140px)] min-h-[580px]">
       {/* Hidden audio container for remote LiveKit tracks */}
       <div ref={audioContainerRef} className="hidden" aria-hidden="true" />
 
@@ -744,10 +744,10 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
         </div>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 min-h-0">
-        {/* Left: Audio Visualizer & Participants */}
-        <div className="lg:col-span-7 flex flex-col items-center justify-center p-6 sm:p-8 border-b lg:border-b-0 lg:border-r border-[#D1F2EE] bg-[#F3FFFE]/30 gap-5 overflow-y-auto">
+      {/* Main Content Grid: Fixed height with independent scroll columns */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 min-h-0 h-full overflow-hidden">
+        {/* Left: Audio Visualizer & Participants (Stationary / Fixed Position) */}
+        <div className="lg:col-span-7 flex flex-col items-center justify-center p-6 sm:p-8 border-b lg:border-b-0 lg:border-r border-[#D1F2EE] bg-[#F3FFFE]/30 gap-5 h-full overflow-y-auto shrink-0 select-none">
           {micError ? (
             <div className="text-center space-y-3 max-w-sm my-auto">
               <div className="w-16 h-16 rounded-full bg-[#F9EAF0] border-2 border-[#B7E6DF] flex items-center justify-center mx-auto text-[#BE185D]">
@@ -906,8 +906,8 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
           )}
         </div>
 
-        {/* Right: Transcripts, Chat & Participants Tabs */}
-        <div className="lg:col-span-5 flex flex-col h-full min-h-[360px] bg-white border-t lg:border-t-0">
+        {/* Right: Transcripts, Chat & Participants Tabs (Independently Scrollable) */}
+        <div className="lg:col-span-5 flex flex-col h-full min-h-0 bg-white border-t lg:border-t-0 overflow-hidden">
           {/* Tab Bar */}
           <div className="flex items-center gap-1.5 p-3 border-b border-[#D1F2EE] bg-[#F3FFFE] shrink-0">
             <button
@@ -945,8 +945,8 @@ export const LiveAudioRoom: React.FC<LiveAudioRoomProps> = ({
             </button>
           </div>
 
-          {/* Tab Content */}
-          <div className="flex-1 p-3 overflow-y-auto space-y-2.5 min-h-0">
+          {/* Tab Content (Independent vertical scrolling with smooth scrollbar) */}
+          <div className="flex-1 p-3 overflow-y-auto space-y-2.5 min-h-0 overscroll-contain">
             {activeTab === "transcripts" ? (
               transcripts.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center py-12 text-slate-400 space-y-2">
